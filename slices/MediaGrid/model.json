@@ -1,0 +1,96 @@
+{
+  "id": "media_grid",
+  "type": "SharedSlice",
+  "name": "MediaGrid",
+  "description": "Reusable grid OR slider of media items (video / image / embed / text), each with a caption, size and optional link.",
+  "variations": [
+    {
+      "id": "default",
+      "name": "Default",
+      "docURL": "...",
+      "version": "initial",
+      "description": "Default",
+      "imageUrl": "",
+      "primary": {
+        "section_title": {
+          "type": "Text",
+          "config": { "label": "Section title (optional)", "placeholder": "" }
+        },
+        "display_mode": {
+          "type": "Select",
+          "config": {
+            "label": "Display mode",
+            "placeholder": "",
+            "options": ["Grid", "Slider"],
+            "default_value": "Grid"
+          }
+        },
+        "items_per_row": {
+          "type": "Select",
+          "config": {
+            "label": "Items per row (Grid) / slides per view (Slider)",
+            "placeholder": "",
+            "options": ["1", "2", "3", "4"],
+            "default_value": "3"
+          }
+        },
+        "items": {
+          "type": "Group",
+          "config": {
+            "label": "Items",
+            "fields": {
+              "content_type": {
+                "type": "Select",
+                "config": {
+                  "label": "Content type",
+                  "placeholder": "",
+                  "options": ["Video", "Image", "Embed", "Text"],
+                  "default_value": "Image"
+                }
+              },
+              "video": {
+                "type": "Link",
+                "config": { "label": "Video file (.mp4)", "placeholder": "Upload or select an mp4", "select": "media" }
+              },
+              "image": {
+                "type": "Image",
+                "config": { "label": "Image", "constraint": {}, "thumbnails": [] }
+              },
+              "embed": {
+                "type": "Embed",
+                "config": { "label": "Embed (YouTube / Vimeo / SoundCloud)", "placeholder": "Paste a URL" }
+              },
+              "text": {
+                "type": "StructuredText",
+                "config": {
+                  "label": "Text",
+                  "placeholder": "",
+                  "allowTargetBlank": true,
+                  "multi": "paragraph,preformatted,heading2,heading3,strong,em,hyperlink,list-item,o-list-item"
+                }
+              },
+              "caption": {
+                "type": "Text",
+                "config": { "label": "Caption", "placeholder": "" }
+              },
+              "link": {
+                "type": "Link",
+                "config": { "label": "Link (optional — makes the item clickable)", "placeholder": "", "allowTargetBlank": true, "select": null }
+              },
+              "size": {
+                "type": "Select",
+                "config": {
+                  "label": "Size (Grid mode only)",
+                  "placeholder": "",
+                  "options": ["small", "medium", "large"],
+                  "default_value": "medium"
+                }
+              }
+            }
+          }
+        }
+      },
+      "items": {}
+    }
+  ]
+}
