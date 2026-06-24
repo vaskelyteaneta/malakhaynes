@@ -24,11 +24,3 @@ html, body {
   overflow: hidden !important;
 }
 
-.splide__arrow {
-  background: transparent;
-  opacity: 0.6;
-}
-
-.splide__arrow:hover {
-  opacity: 1;
-}
