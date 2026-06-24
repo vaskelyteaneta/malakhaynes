@@ -224,7 +224,7 @@ export interface MediaGridSliceDefaultPrimaryItemsItem {
   text: prismic.RichTextField;
   caption: prismic.KeyTextField;
   link: prismic.LinkField;
-  size: prismic.SelectField<"small" | "medium" | "large">;
+  size: prismic.SelectField<"small" | "medium" | "large" | "full-screen">;
 }
 
 /**

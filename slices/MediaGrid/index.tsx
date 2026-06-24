@@ -11,7 +11,7 @@ export type MediaGridProps = SliceComponentProps<Content.MediaGridSlice>;
 
 type Item = Content.MediaGridSliceDefaultPrimaryItemsItem;
 
-const SPAN: Record<string, number> = { small: 1, medium: 1, large: 2 };
+const SPAN: Record<string, number> = { small: 1, medium: 1, large: 2, "full-screen": 1 };
 
 const MediaGrid = ({ slice }: MediaGridProps): React.JSX.Element => {
   const mode = slice.primary.display_mode || "Grid";
@@ -23,11 +23,8 @@ const MediaGrid = ({ slice }: MediaGridProps): React.JSX.Element => {
       data-slice-type={slice.slice_type}
       data-slice-variation={slice.variation}
       className="media-grid"
+      style={{ maxWidth: "1200px", margin: "0 auto", padding: "2rem", overflow: "hidden" }}
     >
-      {isFilled.keyText(slice.primary.section_title) && (
-        <h2 className="media-grid__title">{slice.primary.section_title}</h2>
-      )}
-
       {mode === "Slider" ? (
         <SliderLayout
           items={items}
@@ -36,6 +33,21 @@ const MediaGrid = ({ slice }: MediaGridProps): React.JSX.Element => {
         />
       ) : (
         <GridLayout items={items} columns={perView} />
+      )}
+
+      {isFilled.keyText(slice.primary.section_title) && (
+        <figcaption
+          style={{
+            textAlign: "center",
+            fontFamily: "Georgia, 'Times New Roman', serif",
+            fontSize: "1.5rem",
+            lineHeight: "1.8",
+            padding: "2rem 1rem",
+            color: "#111",
+          }}
+        >
+          {slice.primary.section_title}
+        </figcaption>
       )}
     </section>
   );
@@ -81,7 +93,7 @@ function SliderLayout({
       perMove: 1,
       gap: "1.5rem",
       pagination: false,
-      arrows: true,
+      arrows: items.length > perView,
       rewind: true,
     });
     splide.mount();
@@ -89,6 +101,7 @@ function SliderLayout({
   }, [perView, items.length]);
 
   return (
+    <div style={{ padding: "0 3rem" }}>
     <div className="splide media-grid__slider" ref={ref} aria-label={label}>
       <div className="splide__track">
         <ul className="splide__list">
@@ -100,6 +113,7 @@ function SliderLayout({
         </ul>
       </div>
     </div>
+    </div>
   );
 }
 
@@ -110,11 +124,33 @@ function MediaItem({
   item: Item;
   style?: React.CSSProperties;
 }): React.JSX.Element {
+  const fullScreen = item.size === "full-screen";
   return (
-    <figure className="media-grid__item" style={{ margin: 0, ...style }}>
+    <figure
+      className="media-grid__item"
+      style={{
+        margin: 0,
+        ...(fullScreen
+          ? { width: "100vw", position: "relative", left: "50%", transform: "translateX(-50%)" }
+          : style),
+      }}
+    >
       <ItemMedia item={item} />
       {isFilled.keyText(item.caption) && (
-        <figcaption className="media-grid__caption">{item.caption}</figcaption>
+        <figcaption
+          style={{
+            textAlign: "center",
+            fontFamily: "Georgia, 'Times New Roman', serif",
+            fontSize: "1.5rem",
+            lineHeight: "1.8",
+            padding: "2rem 1rem",
+            background: "#fff",
+            color: "#111",
+            whiteSpace: "pre-line",
+          }}
+        >
+          {item.caption}
+        </figcaption>
       )}
     </figure>
   );
@@ -141,7 +177,7 @@ function renderByType(item: Item): React.JSX.Element | null {
 
     case "Image":
       return isFilled.image(item.image) ? (
-        <PrismicNextImage field={item.image} className="media-grid__image" />
+        <PrismicNextImage field={item.image} className="media-grid__image" style={{ maxWidth: "100%", height: "auto", display: "block", margin: "0 auto" }} />
       ) : null;
 
     case "Embed":
@@ -154,7 +190,16 @@ function renderByType(item: Item): React.JSX.Element | null {
 
     case "Text":
       return isFilled.richText(item.text) ? (
-        <div className="media-grid__text">
+        <div
+          className="media-grid__text"
+          style={{
+            textAlign: "center",
+            fontFamily: "Georgia, 'Times New Roman', serif",
+            fontSize: "1.1rem",
+            lineHeight: "1.8",
+            padding: "2rem 1rem",
+          }}
+        >
           <PrismicRichText field={item.text} />
         </div>
       ) : null;

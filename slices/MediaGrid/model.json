@@ -82,7 +82,7 @@
                 "config": {
                   "label": "Size (Grid mode only)",
                   "placeholder": "",
-                  "options": ["small", "medium", "large"],
+                  "options": ["small", "medium", "large", "full-screen"],
                   "default_value": "medium"
                 }
               }
