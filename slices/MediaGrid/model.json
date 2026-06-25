@@ -85,6 +85,24 @@
                   "options": ["small", "medium", "large", "full-screen"],
                   "default_value": "medium"
                 }
+              },
+              "object_fit": {
+                "type": "Select",
+                "config": {
+                  "label": "Image fit",
+                  "placeholder": "",
+                  "options": ["contain", "cover", "fill"],
+                  "default_value": "contain"
+                }
+              },
+              "image_height": {
+                "type": "Select",
+                "config": {
+                  "label": "Image height",
+                  "placeholder": "",
+                  "options": ["auto", "300px", "400px", "500px", "600px", "700px", "800px"],
+                  "default_value": "auto"
+                }
               }
             }
           }

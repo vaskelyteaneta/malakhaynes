@@ -178,10 +178,25 @@ function renderByType(item: Item): React.JSX.Element | null {
         <CustomVideoPlayer src={item.video.url} />
       ) : null;
 
-    case "Image":
+    case "Image": {
+      const fit = item.object_fit || "contain";
+      const h = item.image_height || "auto";
+      const hasFixedHeight = h !== "auto";
       return isFilled.image(item.image) ? (
-        <PrismicNextImage field={item.image} fallbackAlt="" style={{ width: "100%", height: "auto", display: "block" }} />
+        <div style={{ width: "100%", height: hasFixedHeight ? h : undefined, overflow: "hidden" }}>
+          <PrismicNextImage
+            field={item.image}
+            fallbackAlt=""
+            style={{
+              width: "100%",
+              height: hasFixedHeight ? h : "auto",
+              objectFit: hasFixedHeight ? (fit as React.CSSProperties["objectFit"]) : undefined,
+              display: "block",
+            }}
+          />
+        </div>
       ) : null;
+    }
 
     case "Embed":
       return isFilled.embed(item.embed) && item.embed.html ? (
