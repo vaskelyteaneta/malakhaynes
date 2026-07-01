@@ -91,11 +91,11 @@ function SliderLayout({ items, perView }: { items: Item[]; perView: number }) {
   };
 
   return (
-    <div style={{ padding: "0 3rem" }}>
-      {/* Image-only scroll area — arrows are centered on this */}
+    <div>
+      {/* Scroll area — arrows float over the edges */}
       <div style={{ position: "relative" }}>
         {canPrev && (
-          <button aria-label="Previous" style={{ ...arrowStyle, left: "-3rem" }} onClick={() => go("prev")}>‹</button>
+          <button aria-label="Previous" style={{ ...arrowStyle, left: "0.5rem" }} onClick={() => go("prev")}>‹</button>
         )}
         <div
           ref={scrollRef}
@@ -114,7 +114,7 @@ function SliderLayout({ items, perView }: { items: Item[]; perView: number }) {
           ))}
         </div>
         {canNext && (
-          <button aria-label="Next" style={{ ...arrowStyle, right: "-3rem" }} onClick={() => go("next")}>›</button>
+          <button aria-label="Next" style={{ ...arrowStyle, right: "0.5rem" }} onClick={() => go("next")}>›</button>
         )}
       </div>
 
