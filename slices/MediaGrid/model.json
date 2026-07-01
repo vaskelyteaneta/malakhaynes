@@ -18,7 +18,7 @@
             "label": "Section title (optional)",
             "placeholder": "",
             "allowTargetBlank": false,
-            "single": "paragraph,strong,em"
+            "multi": "paragraph,strong,em"
           }
         },
         "display_mode": {
@@ -80,7 +80,7 @@
                   "label": "Caption (Enter = new row)",
                   "placeholder": "",
                   "allowTargetBlank": false,
-                  "single": "paragraph,strong,em"
+                  "multi": "paragraph,strong,em"
                 }
               },
               "link": {
