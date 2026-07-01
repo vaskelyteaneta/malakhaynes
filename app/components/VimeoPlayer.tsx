@@ -82,18 +82,16 @@ export default function VimeoPlayer({ html }: { html: string }) {
         )}
       </div>
 
-      {/* Controls bar — hover only */}
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 5, opacity: hovered ? 1 : 0, transition: "opacity 0.2s" }}>
-        {/* Time */}
-        <div style={{ padding: "0 0 6px 4px", color: "#fff", fontSize: "0.75rem", fontFamily: "monospace", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>
+      {/* Controls bar — inside video, above white overlay, hover only */}
+      <div style={{ position: "absolute", bottom: "9%", left: 0, right: 0, zIndex: 5, opacity: hovered ? 1 : 0, transition: "opacity 0.2s", padding: "0 12px 8px" }}>
+        <div style={{ color: "#fff", fontSize: "0.75rem", fontFamily: "monospace", textShadow: "0 1px 4px rgba(0,0,0,0.8)", marginBottom: 6 }}>
           {fmt(currentTime)} / {fmt(duration)}
         </div>
-        {/* Scrub bar */}
         <div
           onClick={seek}
-          style={{ height: 3, background: "rgba(255,255,255,0.3)", cursor: "pointer" }}
+          style={{ height: 3, background: "rgba(255,255,255,0.4)", cursor: "pointer", borderRadius: 2 }}
         >
-          <div style={{ height: "100%", width: `${progress}%`, background: "#fff", transition: "width 0.1s linear" }} />
+          <div style={{ height: "100%", width: `${progress}%`, background: "#fff", borderRadius: 2, transition: "width 0.1s linear" }} />
         </div>
       </div>
     </div>
