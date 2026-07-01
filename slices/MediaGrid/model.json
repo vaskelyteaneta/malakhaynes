@@ -13,13 +13,8 @@
       "imageUrl": "",
       "primary": {
         "section_title": {
-          "type": "StructuredText",
-          "config": {
-            "label": "Section title / caption (each paragraph = one row)",
-            "placeholder": "e.g. dreamconstruction ···",
-            "allowTargetBlank": true,
-            "single": "paragraph,strong,em,hyperlink"
-          }
+          "type": "Text",
+          "config": { "label": "Section title (optional)", "placeholder": "" }
         },
         "display_mode": {
           "type": "Select",
@@ -75,8 +70,13 @@
                 }
               },
               "caption": {
-                "type": "Text",
-                "config": { "label": "Caption", "placeholder": "" }
+                "type": "StructuredText",
+                "config": {
+                  "label": "Caption (Enter = new row)",
+                  "placeholder": "",
+                  "allowTargetBlank": false,
+                  "single": "paragraph,strong,em"
+                }
               },
               "link": {
                 "type": "Link",

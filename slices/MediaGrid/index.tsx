@@ -28,13 +28,10 @@ const MediaGrid = ({ slice }: MediaGridProps): React.JSX.Element => {
         <GridLayout items={items} columns={perView} />
       )}
 
-      {isFilled.richText(slice.primary.section_title) && (
-        <div style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "1.5rem", lineHeight: "1.8", padding: "2rem 1rem", color: "#111" }}>
-          <PrismicRichText
-            field={slice.primary.section_title}
-            components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }}
-          />
-        </div>
+      {isFilled.keyText(slice.primary.section_title) && (
+        <p style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "1.5rem", lineHeight: "1.8", padding: "2rem 1rem", color: "#111", margin: 0 }}>
+          {slice.primary.section_title}
+        </p>
       )}
     </section>
   );
@@ -122,10 +119,10 @@ function SliderLayout({ items, perView }: { items: Item[]; perView: number }) {
 
       {/* Captions shown below, for currently visible items */}
       {items.slice(index * perView, index * perView + perView).map((item, i) =>
-        isFilled.keyText(item.caption) ? (
-          <figcaption key={i} style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "1.1rem", lineHeight: "1.8", padding: "1rem", color: "#111" }}>
-            {item.caption}
-          </figcaption>
+        Array.isArray(item.caption) && isFilled.richText(item.caption) ? (
+          <div key={i} style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "1.5rem", lineHeight: "1.8", padding: "2rem 1rem", color: "#111" }}>
+            <PrismicRichText field={item.caption} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
+          </div>
         ) : null
       )}
     </div>
@@ -144,10 +141,10 @@ function MediaItem({ item, style }: { item: Item; style?: React.CSSProperties })
       }}
     >
       <ItemMedia item={item} />
-      {isFilled.keyText(item.caption) && (
-        <figcaption style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "1.1rem", lineHeight: "1.8", padding: "1rem", color: "#111" }}>
-          {item.caption}
-        </figcaption>
+      {Array.isArray(item.caption) && isFilled.richText(item.caption) && (
+        <div style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "1.5rem", lineHeight: "1.8", padding: "2rem 1rem", color: "#111" }}>
+          <PrismicRichText field={item.caption} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
+        </div>
       )}
     </figure>
   );

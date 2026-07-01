@@ -222,7 +222,7 @@ export interface MediaGridSliceDefaultPrimaryItemsItem {
   image: prismic.ImageField;
   embed: prismic.EmbedField;
   text: prismic.RichTextField;
-  caption: prismic.KeyTextField;
+  caption: prismic.RichTextField;
   link: prismic.LinkField;
   size: prismic.SelectField<"small" | "medium" | "large" | "full-screen">;
   object_fit: prismic.SelectField<"contain" | "cover" | "fill">;
@@ -239,7 +239,7 @@ export interface MediaGridSliceDefaultPrimaryItemsItem {
 export type MediaGridSliceDefault = prismic.SharedSliceVariation<
   "default",
   Simplify<{
-    section_title: prismic.RichTextField;
+    section_title: prismic.KeyTextField;
     display_mode: prismic.SelectField<"Grid" | "Slider">;
     items_per_row: prismic.SelectField<"1" | "2" | "3" | "4">;
     items: prismic.GroupField<Simplify<MediaGridSliceDefaultPrimaryItemsItem>>;
