@@ -28,10 +28,10 @@ const MediaGrid = ({ slice }: MediaGridProps): React.JSX.Element => {
         <GridLayout items={items} columns={perView} />
       )}
 
-      {isFilled.keyText(slice.primary.section_title) && (
-        <p style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "1.5rem", lineHeight: "1.8", padding: "2rem 1rem", color: "#111", margin: 0 }}>
-          {slice.primary.section_title}
-        </p>
+      {Array.isArray(slice.primary.section_title) && isFilled.richText(slice.primary.section_title) && (
+        <div style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "1.5rem", lineHeight: "1.8", padding: "2rem 1rem", color: "#111" }}>
+          <PrismicRichText field={slice.primary.section_title} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
+        </div>
       )}
     </section>
   );

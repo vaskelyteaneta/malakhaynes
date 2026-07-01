@@ -13,8 +13,13 @@
       "imageUrl": "",
       "primary": {
         "section_title": {
-          "type": "Text",
-          "config": { "label": "Section title (optional)", "placeholder": "" }
+          "type": "StructuredText",
+          "config": {
+            "label": "Section title (optional)",
+            "placeholder": "",
+            "allowTargetBlank": false,
+            "single": "paragraph,strong,em"
+          }
         },
         "display_mode": {
           "type": "Select",
