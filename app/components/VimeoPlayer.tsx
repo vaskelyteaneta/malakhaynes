@@ -64,7 +64,7 @@ export default function VimeoPlayer({ html }: { html: string }) {
           ref={iframeRef}
           src={src}
           allow="autoplay; fullscreen; picture-in-picture"
-          style={{ position: "absolute", top: "-14%", left: 0, width: "100%", height: "128%", border: 0 }}
+          style={{ position: "absolute", top: "-20%", left: 0, width: "100%", height: "140%", border: 0 }}
         />
       </div>
 
