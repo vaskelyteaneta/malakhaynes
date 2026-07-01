@@ -188,10 +188,24 @@ function renderByType(item: Item): React.JSX.Element | null {
       ) : null;
     }
 
-    case "Embed":
-      return isFilled.embed(item.embed) && item.embed.html ? (
-        <div dangerouslySetInnerHTML={{ __html: item.embed.html }} />
-      ) : null;
+    case "Embed": {
+      if (!isFilled.embed(item.embed) || !item.embed.html) return null;
+      let html = item.embed.html;
+      if (html.includes("vimeo.com/video/")) {
+        html = html.replace(/src="([^"]*vimeo\.com\/video\/[^"]*)"/, (_match, src) => {
+          try {
+            const url = new URL(src);
+            url.searchParams.set("title", "0");
+            url.searchParams.set("byline", "0");
+            url.searchParams.set("portrait", "0");
+            return `src="${url.toString()}"`;
+          } catch { return _match; }
+        });
+      }
+      return <div style={{ position: "relative", paddingBottom: "56.25%", height: 0, overflow: "hidden" }}>
+        <div style={{ position: "absolute", inset: 0 }} dangerouslySetInnerHTML={{ __html: html.replace("<iframe", '<iframe style="width:100%;height:100%;position:absolute;top:0;left:0"') }} />
+      </div>;
+    }
 
     case "Text":
       return isFilled.richText(item.text) ? (
