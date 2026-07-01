@@ -14,6 +14,8 @@
     "@prismicio/next": "^2.2.4",
     "@prismicio/react": "^3.4.1",
     "@splidejs/splide": "^4.1.4",
+    "@types/vimeo__player": "^2.18.3",
+    "@vimeo/player": "^2.30.4",
     "next": "16.2.9",
     "react": "19.2.4",
     "react-dom": "19.2.4"
