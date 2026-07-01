@@ -58,14 +58,16 @@ export default function VimeoPlayer({ html }: { html: string }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* iframe — extra height hides Vimeo's bottom bar */}
       <div style={{ position: "relative", paddingBottom: "56.25%", height: 0, overflow: "hidden" }}>
         <iframe
           ref={iframeRef}
           src={src}
           allow="autoplay; fullscreen; picture-in-picture"
-          style={{ position: "absolute", top: "-20%", left: 0, width: "100%", height: "140%", border: 0 }}
+          style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0 }}
         />
+        {/* White overlays to cover letterbox bars */}
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "8%", background: "#fff", zIndex: 2 }} />
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "8%", background: "#fff", zIndex: 2 }} />
       </div>
 
       {/* Play/pause overlay */}
