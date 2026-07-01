@@ -73,7 +73,7 @@ export default function VimeoPlayer({ html }: { html: string }) {
       {/* Play/pause overlay */}
       <div
         onClick={toggle}
-        style={{ position: "absolute", inset: 0, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+        style={{ position: "absolute", inset: 0, zIndex: 4, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
       >
         {!playing && (
           <div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(255,255,255,0.9)", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -83,7 +83,7 @@ export default function VimeoPlayer({ html }: { html: string }) {
       </div>
 
       {/* Controls bar — hover only */}
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, opacity: hovered ? 1 : 0, transition: "opacity 0.2s" }}>
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 5, opacity: hovered ? 1 : 0, transition: "opacity 0.2s" }}>
         {/* Time */}
         <div style={{ padding: "0 0 6px 4px", color: "#fff", fontSize: "0.75rem", fontFamily: "monospace", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>
           {fmt(currentTime)} / {fmt(duration)}
