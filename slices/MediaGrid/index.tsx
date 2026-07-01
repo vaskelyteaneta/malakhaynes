@@ -28,19 +28,13 @@ const MediaGrid = ({ slice }: MediaGridProps): React.JSX.Element => {
         <GridLayout items={items} columns={perView} />
       )}
 
-      {isFilled.keyText(slice.primary.section_title) && (
-        <figcaption
-          style={{
-            textAlign: "center",
-            fontFamily: "Georgia, 'Times New Roman', serif",
-            fontSize: "1.5rem",
-            lineHeight: "1.8",
-            padding: "2rem 1rem",
-            color: "#111",
-          }}
-        >
-          {slice.primary.section_title}
-        </figcaption>
+      {isFilled.richText(slice.primary.section_title) && (
+        <div style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "1.5rem", lineHeight: "1.8", padding: "2rem 1rem", color: "#111" }}>
+          <PrismicRichText
+            field={slice.primary.section_title}
+            components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }}
+          />
+        </div>
       )}
     </section>
   );
@@ -69,13 +63,19 @@ function GridLayout({ items, columns }: { items: Item[]; columns: number }) {
 
 function SliderLayout({ items, perView }: { items: Item[]; perView: number }) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const showArrows = items.length > perView;
+  const [index, setIndex] = useState(0);
+  const totalSlides = Math.ceil(items.length / perView);
+  const canPrev = index > 0;
+  const canNext = index < totalSlides - 1;
 
   const go = (dir: "prev" | "next") => {
     const el = scrollRef.current;
     if (!el) return;
-    const slideWidth = el.offsetWidth / perView;
-    el.scrollBy({ left: dir === "next" ? slideWidth : -slideWidth, behavior: "smooth" });
+    const newIndex = dir === "next"
+      ? Math.min(index + 1, totalSlides - 1)
+      : Math.max(index - 1, 0);
+    el.scrollTo({ left: newIndex * el.offsetWidth, behavior: "smooth" });
+    setIndex(newIndex);
   };
 
   const arrowStyle: React.CSSProperties = {
@@ -93,35 +93,40 @@ function SliderLayout({ items, perView }: { items: Item[]; perView: number }) {
   };
 
   return (
-    <div style={{ position: "relative", padding: "0 3rem" }}>
-      {showArrows && (
-        <button aria-label="Previous" style={{ ...arrowStyle, left: 0 }} onClick={() => go("prev")}>‹</button>
-      )}
-
-      <div
-        ref={scrollRef}
-        style={{
-          display: "flex",
-          overflowX: "hidden",
-          scrollSnapType: "x mandatory",
-          gap: "1.5rem",
-        }}
-      >
-        {items.map((item, i) => (
-          <div
-            key={i}
-            style={{
-              flex: `0 0 calc(${100 / perView}% - ${((perView - 1) * 1.5) / perView}rem)`,
-              scrollSnapAlign: "start",
-            }}
-          >
-            <MediaItem item={item} />
-          </div>
-        ))}
+    <div style={{ padding: "0 3rem" }}>
+      {/* Image-only scroll area — arrows are centered on this */}
+      <div style={{ position: "relative" }}>
+        {canPrev && (
+          <button aria-label="Previous" style={{ ...arrowStyle, left: "-3rem" }} onClick={() => go("prev")}>‹</button>
+        )}
+        <div
+          ref={scrollRef}
+          style={{ display: "flex", overflowX: "hidden", scrollSnapType: "x mandatory" }}
+        >
+          {items.map((item, i) => (
+            <div
+              key={i}
+              style={{
+                flex: `0 0 calc(${100 / perView}% - ${((perView - 1) * 1.5) / perView}rem)`,
+                scrollSnapAlign: "start",
+              }}
+            >
+              <ItemMedia item={item} />
+            </div>
+          ))}
+        </div>
+        {canNext && (
+          <button aria-label="Next" style={{ ...arrowStyle, right: "-3rem" }} onClick={() => go("next")}>›</button>
+        )}
       </div>
 
-      {showArrows && (
-        <button aria-label="Next" style={{ ...arrowStyle, right: 0 }} onClick={() => go("next")}>›</button>
+      {/* Captions shown below, for currently visible items */}
+      {items.slice(index * perView, index * perView + perView).map((item, i) =>
+        isFilled.keyText(item.caption) ? (
+          <figcaption key={i} style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "1.1rem", lineHeight: "1.8", padding: "1rem", color: "#111" }}>
+            {item.caption}
+          </figcaption>
+        ) : null
       )}
     </div>
   );
@@ -140,18 +145,7 @@ function MediaItem({ item, style }: { item: Item; style?: React.CSSProperties })
     >
       <ItemMedia item={item} />
       {isFilled.keyText(item.caption) && (
-        <figcaption
-          style={{
-            textAlign: "center",
-            fontFamily: "Georgia, 'Times New Roman', serif",
-            fontSize: "1.5rem",
-            lineHeight: "1.8",
-            padding: "2rem 1rem",
-            background: "#fff",
-            color: "#111",
-            whiteSpace: "pre-line",
-          }}
-        >
+        <figcaption style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "1.1rem", lineHeight: "1.8", padding: "1rem", color: "#111" }}>
           {item.caption}
         </figcaption>
       )}
@@ -179,18 +173,17 @@ function renderByType(item: Item): React.JSX.Element | null {
       ) : null;
 
     case "Image": {
-      const fit = item.object_fit || "contain";
+      const fit = (item.object_fit || "contain") as React.CSSProperties["objectFit"];
       const h = item.image_height || "auto";
-      const hasFixedHeight = h !== "auto";
       return isFilled.image(item.image) ? (
-        <div style={{ width: "100%", height: hasFixedHeight ? h : undefined, overflow: "hidden" }}>
+        <div style={{ width: "100%", height: h === "auto" ? undefined : h, overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center" }}>
           <PrismicNextImage
             field={item.image}
             fallbackAlt=""
             style={{
               width: "100%",
-              height: hasFixedHeight ? h : "auto",
-              objectFit: hasFixedHeight ? (fit as React.CSSProperties["objectFit"]) : undefined,
+              height: h === "auto" ? "auto" : h,
+              objectFit: h === "auto" ? undefined : fit,
               display: "block",
             }}
           />

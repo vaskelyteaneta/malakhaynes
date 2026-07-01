@@ -239,7 +239,7 @@ export interface MediaGridSliceDefaultPrimaryItemsItem {
 export type MediaGridSliceDefault = prismic.SharedSliceVariation<
   "default",
   Simplify<{
-    section_title: prismic.KeyTextField;
+    section_title: prismic.RichTextField;
     display_mode: prismic.SelectField<"Grid" | "Slider">;
     items_per_row: prismic.SelectField<"1" | "2" | "3" | "4">;
     items: prismic.GroupField<Simplify<MediaGridSliceDefaultPrimaryItemsItem>>;
