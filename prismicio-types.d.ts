@@ -242,6 +242,7 @@ export type MediaGridSliceDefault = prismic.SharedSliceVariation<
     section_title: prismic.RichTextField;
     display_mode: prismic.SelectField<"Grid" | "Slider">;
     items_per_row: prismic.SelectField<"1" | "2" | "3" | "4">;
+    gaps: prismic.SelectField<"normal" | "full-screen">;
     items: prismic.GroupField<Simplify<MediaGridSliceDefaultPrimaryItemsItem>>;
   }>,
   never

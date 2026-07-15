@@ -12,25 +12,32 @@ type Item = Content.MediaGridSliceDefaultPrimaryItemsItem;
 
 const SPAN: Record<string, number> = { small: 1, medium: 1, large: 2, "full-screen": 1 };
 
+// Shared with the <section> wrapper so the slider's image track lines up with
+// every other (non-slider) slice's content width.
+const CONTAINER_MAX_WIDTH = "1200px";
+const CONTAINER_PADDING = "2rem";
+
 const MediaGrid = ({ slice }: MediaGridProps): React.JSX.Element => {
   const mode = slice.primary.display_mode || "Grid";
   const perView = Number(slice.primary.items_per_row || "3");
   const items = slice.primary.items;
+  const fullScreen = slice.primary.gaps === "full-screen";
+  const gap = fullScreen ? 0 : 1.5;
 
   return (
     <section
       data-slice-type={slice.slice_type}
       data-slice-variation={slice.variation}
-      style={{ maxWidth: "1200px", margin: "0 auto", padding: "2rem" }}
+      style={fullScreen ? { maxWidth: "100%", margin: 0, padding: 0 } : { maxWidth: CONTAINER_MAX_WIDTH, margin: "0 auto", padding: CONTAINER_PADDING }}
     >
       {mode === "Slider" ? (
-        <SliderLayout items={items} perView={perView} />
+        <SliderLayout items={items} perView={perView} gap={gap} fullScreen={fullScreen} />
       ) : (
-        <GridLayout items={items} columns={perView} />
+        <GridLayout items={items} columns={perView} gap={gap} />
       )}
 
       {Array.isArray(slice.primary.section_title) && isFilled.richText(slice.primary.section_title) && (
-        <div style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "1.5rem", lineHeight: "1.8", padding: "2rem 1rem", color: "#111" }}>
+        <div style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "1.5rem", lineHeight: "1.8", padding: "2rem 1rem", color: "var(--foreground)" }}>
           <PrismicRichText field={slice.primary.section_title} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
         </div>
       )}
@@ -40,26 +47,60 @@ const MediaGrid = ({ slice }: MediaGridProps): React.JSX.Element => {
 
 export default MediaGrid;
 
-function GridLayout({ items, columns }: { items: Item[]; columns: number }) {
+function GridLayout({ items, columns, gap }: { items: Item[]; columns: number; gap: number }) {
+  // Consecutive full-screen items share one full-bleed row, split evenly between them,
+  // instead of each item breaking out to 100vw on its own (which causes overlap).
+  const groups: { fullScreen: boolean; items: Item[] }[] = [];
+  for (const item of items) {
+    const isFull = item.size === "full-screen";
+    const last = groups[groups.length - 1];
+    if (last && last.fullScreen === isFull) last.items.push(item);
+    else groups.push({ fullScreen: isFull, items: [item] });
+  }
+
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-        gap: "1.5rem",
-      }}
-    >
-      {items.map((item, i) => {
-        const span = Math.min(SPAN[item.size || "medium"] ?? 1, columns);
-        return (
-          <MediaItem key={i} item={item} style={{ gridColumn: `span ${span}` }} />
-        );
-      })}
+    <div style={{ display: "flex", flexDirection: "column", gap: `${gap}rem` }}>
+      {groups.map((group, gi) =>
+        group.fullScreen ? (
+          <div
+            key={gi}
+            style={{
+              width: "100vw",
+              position: "relative",
+              left: "50%",
+              transform: "translateX(-50%)",
+              display: "grid",
+              gridTemplateColumns: `repeat(${group.items.length}, minmax(0, 1fr))`,
+              gap: 0,
+            }}
+          >
+            {group.items.map((item, i) => (
+              <MediaItem key={i} item={item} />
+            ))}
+          </div>
+        ) : (
+          <div
+            key={gi}
+            style={{
+              display: "grid",
+              gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+              gap: `${gap}rem`,
+            }}
+          >
+            {group.items.map((item, i) => {
+              const span = Math.min(SPAN[item.size || "medium"] ?? 1, columns);
+              return (
+                <MediaItem key={i} item={item} style={{ gridColumn: `span ${span}` }} />
+              );
+            })}
+          </div>
+        )
+      )}
     </div>
   );
 }
 
-function SliderLayout({ items, perView }: { items: Item[]; perView: number }) {
+function SliderLayout({ items, perView, gap, fullScreen }: { items: Item[]; perView: number; gap: number; fullScreen: boolean }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
   const totalSlides = Math.ceil(items.length / perView);
@@ -84,44 +125,59 @@ function SliderLayout({ items, perView }: { items: Item[]; perView: number }) {
     border: "none",
     fontSize: "2rem",
     cursor: "pointer",
-    color: "#111",
+    color: "var(--foreground)",
     lineHeight: 1,
     padding: "0.5rem",
     zIndex: 10,
   };
 
+  const track = (
+    <div
+      ref={scrollRef}
+      style={{ display: "flex", gap: `${gap}rem`, overflowX: "hidden", scrollSnapType: "x mandatory" }}
+    >
+      {items.map((item, i) => (
+        <div
+          key={i}
+          style={{
+            flex: `0 0 calc(${100 / perView}% - ${((perView - 1) * gap) / perView}rem)`,
+            scrollSnapAlign: "start",
+          }}
+        >
+          <ItemMedia item={item} />
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <div>
-      {/* Scroll area — arrows float over the edges */}
-      <div style={{ position: "relative" }}>
+      {/* Arrows break out into the page margin outside the content column, instead of
+          insetting the image track — so the track stays the same width as every other slice. */}
+      <div
+        style={
+          fullScreen
+            ? { position: "relative" }
+            : { position: "relative", width: "100vw", left: "50%", transform: "translateX(-50%)" }
+        }
+      >
         {canPrev && (
-          <button aria-label="Previous" style={{ ...arrowStyle, left: "0.5rem" }} onClick={() => go("prev")}>‹</button>
+          <button aria-label="Previous" style={{ ...arrowStyle, left: "1rem" }} onClick={() => go("prev")}>‹</button>
         )}
-        <div
-          ref={scrollRef}
-          style={{ display: "flex", overflowX: "hidden", scrollSnapType: "x mandatory" }}
-        >
-          {items.map((item, i) => (
-            <div
-              key={i}
-              style={{
-                flex: `0 0 calc(${100 / perView}% - ${((perView - 1) * 1.5) / perView}rem)`,
-                scrollSnapAlign: "start",
-              }}
-            >
-              <ItemMedia item={item} />
-            </div>
-          ))}
-        </div>
+        {fullScreen ? track : (
+          <div style={{ maxWidth: CONTAINER_MAX_WIDTH, margin: "0 auto", padding: `0 ${CONTAINER_PADDING}` }}>
+            {track}
+          </div>
+        )}
         {canNext && (
-          <button aria-label="Next" style={{ ...arrowStyle, right: "0.5rem" }} onClick={() => go("next")}>›</button>
+          <button aria-label="Next" style={{ ...arrowStyle, right: "1rem" }} onClick={() => go("next")}>›</button>
         )}
       </div>
 
       {/* Captions shown below, for currently visible items */}
       {items.slice(index * perView, index * perView + perView).map((item, i) =>
         Array.isArray(item.caption) && isFilled.richText(item.caption) ? (
-          <div key={i} style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "1.5rem", lineHeight: "1.8", padding: "2rem 1rem", color: "#111" }}>
+          <div key={i} style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "1.5rem", lineHeight: "1.8", padding: "2rem 1rem", color: "var(--foreground)" }}>
             <PrismicRichText field={item.caption} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
           </div>
         ) : null
@@ -131,19 +187,11 @@ function SliderLayout({ items, perView }: { items: Item[]; perView: number }) {
 }
 
 function MediaItem({ item, style }: { item: Item; style?: React.CSSProperties }): React.JSX.Element {
-  const fullScreen = item.size === "full-screen";
   return (
-    <figure
-      style={{
-        margin: 0,
-        ...(fullScreen
-          ? { width: "100vw", position: "relative", left: "50%", transform: "translateX(-50%)" }
-          : style),
-      }}
-    >
+    <figure style={{ margin: 0, ...style }}>
       <ItemMedia item={item} />
       {Array.isArray(item.caption) && isFilled.richText(item.caption) && (
-        <div style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "1.5rem", lineHeight: "1.8", padding: "2rem 1rem", color: "#111" }}>
+        <div style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "1.5rem", lineHeight: "1.8", padding: "2rem 1rem", color: "var(--foreground)" }}>
           <PrismicRichText field={item.caption} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
         </div>
       )}

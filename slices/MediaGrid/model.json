@@ -39,6 +39,15 @@
             "default_value": "3"
           }
         },
+        "gaps": {
+          "type": "Select",
+          "config": {
+            "label": "Gaps (spacing between items & grid width)",
+            "placeholder": "",
+            "options": ["normal", "full-screen"],
+            "default_value": "normal"
+          }
+        },
         "items": {
           "type": "Group",
           "config": {
