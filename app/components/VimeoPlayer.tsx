@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Player from "@vimeo/player";
 
 export default function VimeoPlayer({ html }: { html: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<Player | null>(null);
   const [playing, setPlaying] = useState(false);
@@ -32,6 +33,21 @@ export default function VimeoPlayer({ html }: { html: string }) {
     return () => { player.destroy(); };
   }, [src]);
 
+  // Pause automatically once the player scrolls out of view, so audio doesn't
+  // keep playing while scrolling away from it.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) playerRef.current?.pause();
+      },
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   const toggle = () => {
     if (!playerRef.current) return;
     playing ? playerRef.current.pause() : playerRef.current.play();
@@ -54,6 +70,7 @@ export default function VimeoPlayer({ html }: { html: string }) {
 
   return (
     <div
+      ref={containerRef}
       style={{ position: "relative" }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -65,9 +82,9 @@ export default function VimeoPlayer({ html }: { html: string }) {
           allow="autoplay; fullscreen; picture-in-picture"
           style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0 }}
         />
-        {/* White overlays to cover letterbox bars */}
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "8%", background: "#fff", zIndex: 2 }} />
-        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "8%", background: "#fff", zIndex: 2 }} />
+        {/* Overlays to cover letterbox bars, matching the site's current background */}
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "8%", background: "var(--background)", zIndex: 2 }} />
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "8%", background: "var(--background)", zIndex: 2 }} />
       </div>
 
       {/* Play/pause overlay */}

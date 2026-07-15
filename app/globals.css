@@ -5,17 +5,30 @@
   --foreground: #171717;
 }
 
-@theme inline {
+/* Theme is set by proxy.ts based on domain (or the ?dark/?light override) via
+   data-theme on <html> — intentionally not tied to prefers-color-scheme. */
+[data-theme="dark"] {
+  --background: #000000;
+  --foreground: #ffffff;
+}
+
+/* Plain @theme (not "inline") keeps these as live var() references in the
+   generated utilities, instead of Tailwind resolving/baking them at build
+   time — which was silently dropping the [data-theme="dark"] override. */
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+}
+
+@theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 
 html, body {
-  background: #ffffff !important;
-  color: #111111;
+  background: var(--background) !important;
+  color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   overflow-x: hidden;
 }

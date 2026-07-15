@@ -1,9 +1,11 @@
 import { createClient } from "@/prismicio";
 import { PrismicNextImage, PrismicNextLink } from "@prismicio/next";
+import type { SiteMode } from "@/app/lib/site-mode";
 
-export default async function Header() {
+export default async function Header({ mode }: { mode: SiteMode }) {
   const client = createClient();
   const settings = await client.getSingle("settings");
+  const isDark = mode === "dark";
 
   return (
     <header
@@ -12,12 +14,26 @@ export default async function Header() {
         flexDirection: "column",
         alignItems: "center",
         padding: "2.5rem 2rem 1.5rem",
-        background: "#fff",
+        background: "var(--background)",
         gap: "1.25rem",
       }}
     >
       <PrismicNextLink href="/">
-        <PrismicNextImage field={settings.data.logo} height={64} fallbackAlt="" />
+        {isDark ? (
+          // Placeholder wordmark for Very Inner Vibrations until a real logo is designed.
+          <span
+            style={{
+              fontFamily: "Georgia, 'Times New Roman', serif",
+              fontSize: "1.5rem",
+              letterSpacing: "0.15em",
+              color: "var(--foreground)",
+            }}
+          >
+            VERY INNER VIBRATIONS
+          </span>
+        ) : (
+          <PrismicNextImage field={settings.data.logo} height={64} fallbackAlt="" />
+        )}
       </PrismicNextLink>
 
       <nav style={{ display: "flex", gap: "2.5rem" }}>
@@ -28,7 +44,7 @@ export default async function Header() {
             style={{
               fontFamily: "Georgia, 'Times New Roman', serif",
               fontSize: "1rem",
-              color: "#111",
+              color: "var(--foreground)",
               textDecoration: "none",
             }}
           >
