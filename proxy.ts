@@ -22,9 +22,23 @@ export function proxy(request: NextRequest) {
   const hostname = (request.headers.get("host") || "").split(":")[0];
 
   const forcedMode = searchParams.has("dark") ? "dark" : searchParams.has("light") ? "light" : null;
+
+  // ?dark / ?light (e.g. from the theme toggle button) sets the cookie, then
+  // redirects to the same URL without the query param so it doesn't linger.
+  if (forcedMode) {
+    const cleanUrl = new URL(request.nextUrl);
+    cleanUrl.searchParams.delete("dark");
+    cleanUrl.searchParams.delete("light");
+    const response = NextResponse.redirect(cleanUrl);
+    response.cookies.set(MODE_COOKIE, forcedMode, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+    });
+    return response;
+  }
+
   const cookieMode = request.cookies.get(MODE_COOKIE)?.value;
   const mode =
-    forcedMode ??
     (cookieMode === "dark" || cookieMode === "light" ? cookieMode : null) ??
     envMode ??
     (DARK_MODE_HOSTS.includes(hostname) ? "dark" : "light");
@@ -32,16 +46,7 @@ export function proxy(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set(MODE_HEADER, mode);
 
-  const response = NextResponse.next({ request: { headers: requestHeaders } });
-
-  if (forcedMode) {
-    response.cookies.set(MODE_COOKIE, forcedMode, {
-      path: "/",
-      maxAge: 60 * 60 * 24 * 365,
-    });
-  }
-
-  return response;
+  return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
 export const config = {
