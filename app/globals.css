@@ -37,3 +37,18 @@ html, body {
   overflow: hidden !important;
 }
 
+/* Mobile: collapse the media grid to a single stacked column instead of
+   side-by-side, and let items that spanned multiple columns fall back to
+   spanning just the one column that remains. */
+@media (max-width: 640px) {
+  .media-grid-row {
+    grid-template-columns: 1fr !important;
+  }
+  .media-grid-row > * {
+    grid-column: auto !important;
+  }
+  .media-grid-fullrow {
+    grid-template-columns: 1fr !important;
+  }
+}
+

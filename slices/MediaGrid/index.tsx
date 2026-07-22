@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Content, isFilled } from "@prismicio/client";
 import { SliceComponentProps, PrismicRichText } from "@prismicio/react";
 import { PrismicNextImage, PrismicNextLink } from "@prismicio/next";
@@ -17,9 +17,30 @@ const SPAN: Record<string, number> = { small: 1, medium: 1, large: 2, "full-scre
 const CONTAINER_MAX_WIDTH = "1200px";
 const CONTAINER_PADDING = "2rem";
 
+const CAPTION_FONT_SIZE = "clamp(0.95rem, 0.6rem + 1.2vw, 1.5rem)";
+const TEXT_FONT_SIZE = "clamp(0.85rem, 0.7rem + 0.5vw, 1.1rem)";
+
+// Below this width, the slider shows one item per screen (more, shorter
+// slides) instead of the configured items-per-row.
+const MOBILE_BREAKPOINT = 640;
+
+function useIsMobile(breakpoint = MOBILE_BREAKPOINT): boolean {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${breakpoint}px)`);
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, [breakpoint]);
+  return isMobile;
+}
+
 const MediaGrid = ({ slice }: MediaGridProps): React.JSX.Element => {
   const mode = slice.primary.display_mode || "Grid";
-  const perView = Number(slice.primary.items_per_row || "3");
+  const configuredPerView = Number(slice.primary.items_per_row || "3");
+  const isMobile = useIsMobile();
+  const sliderPerView = isMobile ? 1 : configuredPerView;
   const items = slice.primary.items;
   const fullScreen = slice.primary.gaps === "full-screen";
   const gap = fullScreen ? 0 : 1.5;
@@ -31,13 +52,13 @@ const MediaGrid = ({ slice }: MediaGridProps): React.JSX.Element => {
       style={fullScreen ? { maxWidth: "100%", margin: 0, padding: 0 } : { maxWidth: CONTAINER_MAX_WIDTH, margin: "0 auto", padding: CONTAINER_PADDING }}
     >
       {mode === "Slider" ? (
-        <SliderLayout items={items} perView={perView} gap={gap} fullScreen={fullScreen} />
+        <SliderLayout items={items} perView={sliderPerView} gap={gap} fullScreen={fullScreen} />
       ) : (
-        <GridLayout items={items} columns={perView} gap={gap} />
+        <GridLayout items={items} columns={configuredPerView} gap={gap} />
       )}
 
       {Array.isArray(slice.primary.section_title) && isFilled.richText(slice.primary.section_title) && (
-        <div style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "1.5rem", lineHeight: "1.8", padding: "2rem 1rem", color: "var(--foreground)" }}>
+        <div style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: CAPTION_FONT_SIZE, lineHeight: "1.8", padding: "2rem 1rem", color: "var(--foreground)" }}>
           <PrismicRichText field={slice.primary.section_title} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
         </div>
       )}
@@ -64,6 +85,7 @@ function GridLayout({ items, columns, gap }: { items: Item[]; columns: number; g
         group.fullScreen ? (
           <div
             key={gi}
+            className="media-grid-fullrow"
             style={{
               width: "100vw",
               position: "relative",
@@ -81,6 +103,7 @@ function GridLayout({ items, columns, gap }: { items: Item[]; columns: number; g
         ) : (
           <div
             key={gi}
+            className="media-grid-row"
             style={{
               display: "grid",
               gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
@@ -177,7 +200,7 @@ function SliderLayout({ items, perView, gap, fullScreen }: { items: Item[]; perV
       {/* Captions shown below, for currently visible items */}
       {items.slice(index * perView, index * perView + perView).map((item, i) =>
         Array.isArray(item.caption) && isFilled.richText(item.caption) ? (
-          <div key={i} style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "1.5rem", lineHeight: "1.8", padding: "2rem 1rem", color: "var(--foreground)" }}>
+          <div key={i} style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: CAPTION_FONT_SIZE, lineHeight: "1.8", padding: "2rem 1rem", color: "var(--foreground)" }}>
             <PrismicRichText field={item.caption} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
           </div>
         ) : null
@@ -191,7 +214,7 @@ function MediaItem({ item, style }: { item: Item; style?: React.CSSProperties })
     <figure style={{ margin: 0, ...style }}>
       <ItemMedia item={item} />
       {Array.isArray(item.caption) && isFilled.richText(item.caption) && (
-        <div style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "1.5rem", lineHeight: "1.8", padding: "2rem 1rem", color: "var(--foreground)" }}>
+        <div style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: CAPTION_FONT_SIZE, lineHeight: "1.8", padding: "2rem 1rem", color: "var(--foreground)" }}>
           <PrismicRichText field={item.caption} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
         </div>
       )}
@@ -253,7 +276,7 @@ function renderByType(item: Item): React.JSX.Element | null {
           style={{
             textAlign: "center",
             fontFamily: "Georgia, 'Times New Roman', serif",
-            fontSize: "1.1rem",
+            fontSize: TEXT_FONT_SIZE,
             lineHeight: "1.8",
             padding: "2rem 1rem",
           }}
