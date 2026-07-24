@@ -17,8 +17,8 @@ const SPAN: Record<string, number> = { small: 1, medium: 1, large: 2, "full-scre
 const CONTAINER_MAX_WIDTH = "1200px";
 const CONTAINER_PADDING = "2rem";
 
-const CAPTION_FONT_SIZE = "clamp(0.95rem, 0.6rem + 1.2vw, 1.5rem)";
-const TEXT_FONT_SIZE = "clamp(0.85rem, 0.7rem + 0.5vw, 1.1rem)";
+const CAPTION_FONT_SIZE = "clamp(0.85rem, 0.55rem + 0.9vw, 1.1rem)";
+const TEXT_FONT_SIZE = "clamp(0.8rem, 0.6rem + 0.5vw, 0.95rem)";
 
 // Below this width, the slider shows one item per screen (more, shorter
 // slides) instead of the configured items-per-row.
@@ -245,10 +245,11 @@ function renderByType(item: Item): React.JSX.Element | null {
       const fit = (item.object_fit || "contain") as React.CSSProperties["objectFit"];
       const h = item.image_height || "auto";
       return isFilled.image(item.image) ? (
-        <div style={{ width: "100%", height: h === "auto" ? undefined : h, overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <div className="media-grid-image-wrap" style={{ width: "100%", height: h === "auto" ? undefined : h, overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center" }}>
           <PrismicNextImage
             field={item.image}
             fallbackAlt=""
+            className="media-grid-image"
             style={{
               width: "100%",
               height: h === "auto" ? "auto" : h,

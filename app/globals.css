@@ -50,5 +50,17 @@ html, body {
   .media-grid-fullrow {
     grid-template-columns: 1fr !important;
   }
+
+  /* CMS-configured image_height (e.g. 600px) is tuned for desktop grid
+     rows. On a full-width mobile slide that fixed height crops a landscape
+     image into a tall, portrait-looking box, so fall back to natural
+     (auto) height instead. */
+  .media-grid-image-wrap {
+    height: auto !important;
+  }
+  .media-grid-image {
+    height: auto !important;
+    object-fit: contain !important;
+  }
 }
 
