@@ -14,7 +14,7 @@ export default async function Header({ mode }: { mode: SiteMode }) {
         flexDirection: "column",
         alignItems: "center",
         padding: "2.5rem 2rem 1.5rem",
-        background: "var(--background)",
+        background: "transparent",
         gap: "1.25rem",
       }}
     >

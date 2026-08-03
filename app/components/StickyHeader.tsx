@@ -24,7 +24,7 @@ export default function StickyHeader({ children }: { children: React.ReactNode }
         left: 0,
         right: 0,
         zIndex: 100,
-        background: "var(--background)",
+        background: "transparent",
         transform: visible ? "translateY(0)" : "translateY(-100%)",
         transition: "transform 0.3s ease",
       }}
