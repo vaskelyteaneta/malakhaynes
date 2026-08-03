@@ -23,7 +23,8 @@ export default async function Header({ mode }: { mode: SiteMode }) {
           // Placeholder wordmark for Very Inner Vibrations until a real logo is designed.
           <span
             style={{
-              fontFamily: "Georgia, 'Times New Roman', serif",
+              display: "inline-block",
+              textAlign: "center",
               fontSize: "1.5rem",
               letterSpacing: "0.15em",
               color: "var(--foreground)",
@@ -42,7 +43,6 @@ export default async function Header({ mode }: { mode: SiteMode }) {
             key={item.label}
             field={item.link}
             style={{
-              fontFamily: "Georgia, 'Times New Roman', serif",
               fontSize: "1rem",
               color: "var(--foreground)",
               textDecoration: "none",

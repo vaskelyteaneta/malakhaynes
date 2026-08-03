@@ -17,12 +17,22 @@ const SPAN: Record<string, number> = { small: 1, medium: 1, large: 2, "full-scre
 const CONTAINER_MAX_WIDTH = "1200px";
 const CONTAINER_PADDING = "2rem";
 
+// Used to convert the CMS's image_height (a design-time pixel value, chosen
+// while looking at the item at roughly its default rendered width) into an
+// aspect-ratio instead of a literal height. A literal height stays fixed as
+// the viewport narrows, so the box gets relatively taller — eventually
+// square, then portrait. An aspect-ratio scales with the box's actual
+// rendered width instead, keeping the same shape at any size.
+const REM_PX = 16;
+const MAX_WIDTH_PX = parseFloat(CONTAINER_MAX_WIDTH);
+const CONTAINER_PADDING_PX = parseFloat(CONTAINER_PADDING) * REM_PX;
+
 const CAPTION_FONT_SIZE = "clamp(0.85rem, 0.55rem + 0.9vw, 1.1rem)";
 const TEXT_FONT_SIZE = "clamp(0.8rem, 0.6rem + 0.5vw, 0.95rem)";
 
 // Below this width, the slider shows one item per screen (more, shorter
 // slides) instead of the configured items-per-row.
-const MOBILE_BREAKPOINT = 640;
+const MOBILE_BREAKPOINT = 768;
 
 function useIsMobile(breakpoint = MOBILE_BREAKPOINT): boolean {
   const [isMobile, setIsMobile] = useState(false);
@@ -58,7 +68,7 @@ const MediaGrid = ({ slice }: MediaGridProps): React.JSX.Element => {
       )}
 
       {Array.isArray(slice.primary.section_title) && isFilled.richText(slice.primary.section_title) && (
-        <div style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: CAPTION_FONT_SIZE, lineHeight: "1.8", padding: "2rem 1rem", color: "var(--foreground)" }}>
+        <div className="media-grid-caption" style={{ textAlign: "center", fontSize: CAPTION_FONT_SIZE, lineHeight: "1.8", padding: "0.75rem 1rem", color: "var(--foreground)" }}>
           <PrismicRichText field={slice.primary.section_title} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
         </div>
       )}
@@ -79,6 +89,9 @@ function GridLayout({ items, columns, gap }: { items: Item[]; columns: number; g
     else groups.push({ fullScreen: isFull, items: [item] });
   }
 
+  const availableWidthPx = MAX_WIDTH_PX - 2 * CONTAINER_PADDING_PX;
+  const columnWidthPx = (availableWidthPx - (columns - 1) * gap * REM_PX) / columns;
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: `${gap}rem` }}>
       {groups.map((group, gi) =>
@@ -97,7 +110,7 @@ function GridLayout({ items, columns, gap }: { items: Item[]; columns: number; g
             }}
           >
             {group.items.map((item, i) => (
-              <MediaItem key={i} item={item} />
+              <MediaItem key={i} item={item} referenceWidthPx={MAX_WIDTH_PX / group.items.length} />
             ))}
           </div>
         ) : (
@@ -112,8 +125,9 @@ function GridLayout({ items, columns, gap }: { items: Item[]; columns: number; g
           >
             {group.items.map((item, i) => {
               const span = Math.min(SPAN[item.size || "medium"] ?? 1, columns);
+              const referenceWidthPx = columnWidthPx * span + (span - 1) * gap * REM_PX;
               return (
-                <MediaItem key={i} item={item} style={{ gridColumn: `span ${span}` }} />
+                <MediaItem key={i} item={item} style={{ gridColumn: `span ${span}` }} referenceWidthPx={referenceWidthPx} />
               );
             })}
           </div>
@@ -126,9 +140,34 @@ function GridLayout({ items, columns, gap }: { items: Item[]; columns: number; g
 function SliderLayout({ items, perView, gap, fullScreen }: { items: Item[]; perView: number; gap: number; fullScreen: boolean }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
+  // The track lays out every slide in one continuous flex row (so the scroll-snap
+  // drag works), which means the row's natural height is driven by the *tallest*
+  // slide, not the one currently in view — leaving the visible slide vertically
+  // off-center against that shared height. Measure just the visible slide instead
+  // and clip the row to it.
+  const [activeHeight, setActiveHeight] = useState<number | undefined>(undefined);
   const totalSlides = Math.ceil(items.length / perView);
   const canPrev = index > 0;
   const canNext = index < totalSlides - 1;
+
+  const availableWidthPx = fullScreen ? MAX_WIDTH_PX : MAX_WIDTH_PX - 2 * CONTAINER_PADDING_PX;
+  const referenceWidthPx = (availableWidthPx - (perView - 1) * gap * REM_PX) / perView;
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const visible = Array.from(el.children).slice(index * perView, index * perView + perView) as HTMLElement[];
+    const measure = () => {
+      const tallest = Math.max(0, ...visible.map((c) => c.offsetHeight));
+      if (tallest > 0) setActiveHeight(tallest);
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    visible.forEach((c) => observer.observe(c));
+    return () => observer.disconnect();
+  }, [index, perView, items]);
 
   const go = (dir: "prev" | "next") => {
     const el = scrollRef.current;
@@ -167,16 +206,28 @@ function SliderLayout({ items, perView, gap, fullScreen }: { items: Item[]; perV
             scrollSnapAlign: "start",
           }}
         >
-          <ItemMedia item={item} />
+          <ItemMedia item={item} referenceWidthPx={referenceWidthPx} />
         </div>
       ))}
     </div>
   );
 
+  const arrows = (
+    <>
+      {canPrev && (
+        <button aria-label="Previous" style={{ ...arrowStyle, left: 0 }} onClick={() => go("prev")}>‹</button>
+      )}
+      {canNext && (
+        <button aria-label="Next" style={{ ...arrowStyle, right: 0 }} onClick={() => go("next")}>›</button>
+      )}
+    </>
+  );
+
   return (
     <div>
-      {/* Arrows break out into the page margin outside the content column, instead of
-          insetting the image track — so the track stays the same width as every other slice. */}
+      {/* Arrows sit just inside the actual image track's edge — nested in the same
+          width-constrained wrapper as the track — so their distance from the image
+          stays consistent whether the track is full-bleed or contained. */}
       <div
         style={
           fullScreen
@@ -184,23 +235,23 @@ function SliderLayout({ items, perView, gap, fullScreen }: { items: Item[]; perV
             : { position: "relative", width: "100vw", left: "50%", transform: "translateX(-50%)" }
         }
       >
-        {canPrev && (
-          <button aria-label="Previous" style={{ ...arrowStyle, left: "1rem" }} onClick={() => go("prev")}>‹</button>
-        )}
-        {fullScreen ? track : (
-          <div style={{ maxWidth: CONTAINER_MAX_WIDTH, margin: "0 auto", padding: `0 ${CONTAINER_PADDING}` }}>
+        {fullScreen ? (
+          <div style={{ position: "relative", height: activeHeight, overflow: "hidden" }}>
             {track}
+            {arrows}
           </div>
-        )}
-        {canNext && (
-          <button aria-label="Next" style={{ ...arrowStyle, right: "1rem" }} onClick={() => go("next")}>›</button>
+        ) : (
+          <div style={{ maxWidth: CONTAINER_MAX_WIDTH, margin: "0 auto", padding: `0 ${CONTAINER_PADDING}`, position: "relative", height: activeHeight, overflow: "hidden" }}>
+            {track}
+            {arrows}
+          </div>
         )}
       </div>
 
       {/* Captions shown below, for currently visible items */}
       {items.slice(index * perView, index * perView + perView).map((item, i) =>
         Array.isArray(item.caption) && isFilled.richText(item.caption) ? (
-          <div key={i} style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: CAPTION_FONT_SIZE, lineHeight: "1.8", padding: "2rem 1rem", color: "var(--foreground)" }}>
+          <div key={i} className="media-grid-caption" style={{ textAlign: "center", fontSize: CAPTION_FONT_SIZE, lineHeight: "1.8", padding: "0.75rem 1rem", color: "var(--foreground)" }}>
             <PrismicRichText field={item.caption} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
           </div>
         ) : null
@@ -209,12 +260,12 @@ function SliderLayout({ items, perView, gap, fullScreen }: { items: Item[]; perV
   );
 }
 
-function MediaItem({ item, style }: { item: Item; style?: React.CSSProperties }): React.JSX.Element {
+function MediaItem({ item, style, referenceWidthPx }: { item: Item; style?: React.CSSProperties; referenceWidthPx: number }): React.JSX.Element {
   return (
     <figure style={{ margin: 0, ...style }}>
-      <ItemMedia item={item} />
+      <ItemMedia item={item} referenceWidthPx={referenceWidthPx} />
       {Array.isArray(item.caption) && isFilled.richText(item.caption) && (
-        <div style={{ textAlign: "center", fontFamily: "Georgia, 'Times New Roman', serif", fontSize: CAPTION_FONT_SIZE, lineHeight: "1.8", padding: "2rem 1rem", color: "var(--foreground)" }}>
+        <div className="media-grid-caption" style={{ textAlign: "center", fontSize: CAPTION_FONT_SIZE, lineHeight: "1.8", padding: "0.75rem 1rem", color: "var(--foreground)" }}>
           <PrismicRichText field={item.caption} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
         </div>
       )}
@@ -222,11 +273,11 @@ function MediaItem({ item, style }: { item: Item; style?: React.CSSProperties })
   );
 }
 
-function ItemMedia({ item }: { item: Item }): React.JSX.Element | null {
-  const media = renderByType(item);
+function ItemMedia({ item, referenceWidthPx }: { item: Item; referenceWidthPx: number }): React.JSX.Element | null {
+  const media = renderByType(item, referenceWidthPx);
   if (media && isFilled.link(item.link)) {
     return (
-      <PrismicNextLink field={item.link} className="media-grid__link">
+      <PrismicNextLink field={item.link} className="media-grid__link" target="_blank" rel="noopener noreferrer">
         {media}
       </PrismicNextLink>
     );
@@ -234,7 +285,7 @@ function ItemMedia({ item }: { item: Item }): React.JSX.Element | null {
   return media;
 }
 
-function renderByType(item: Item): React.JSX.Element | null {
+function renderByType(item: Item, referenceWidthPx: number): React.JSX.Element | null {
   switch (item.content_type) {
     case "Video":
       return isFilled.linkToMedia(item.video) ? (
@@ -244,16 +295,23 @@ function renderByType(item: Item): React.JSX.Element | null {
     case "Image": {
       const fit = (item.object_fit || "contain") as React.CSSProperties["objectFit"];
       const h = item.image_height || "auto";
+      // A literal pixel height (h) is a design-time value chosen at roughly
+      // referenceWidthPx wide. Converting it to an aspect-ratio instead of
+      // applying it directly means the box scales proportionally with
+      // whatever width it actually renders at, rather than staying fixed
+      // height while the width shrinks (which is what turns a landscape
+      // image square, then portrait, as the viewport narrows).
+      const heightPx = h === "auto" ? null : parseFloat(h);
       return isFilled.image(item.image) ? (
-        <div className="media-grid-image-wrap" style={{ width: "100%", height: h === "auto" ? undefined : h, overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <div className="media-grid-image-wrap" style={{ width: "100%", aspectRatio: heightPx ? `${referenceWidthPx} / ${heightPx}` : undefined, overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center" }}>
           <PrismicNextImage
             field={item.image}
             fallbackAlt=""
             className="media-grid-image"
             style={{
               width: "100%",
-              height: h === "auto" ? "auto" : h,
-              objectFit: h === "auto" ? undefined : fit,
+              height: heightPx ? "100%" : "auto",
+              objectFit: heightPx ? fit : undefined,
               display: "block",
             }}
           />
@@ -274,12 +332,12 @@ function renderByType(item: Item): React.JSX.Element | null {
     case "Text":
       return isFilled.richText(item.text) ? (
         <div
+          className="media-grid-caption"
           style={{
             textAlign: "center",
-            fontFamily: "Georgia, 'Times New Roman', serif",
             fontSize: TEXT_FONT_SIZE,
             lineHeight: "1.8",
-            padding: "2rem 1rem",
+            padding: "0.75rem 1rem",
           }}
         >
           <PrismicRichText field={item.text} />
