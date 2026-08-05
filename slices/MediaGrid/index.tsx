@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Content, isFilled } from "@prismicio/client";
+import { Content, isFilled, type RichTextField } from "@prismicio/client";
 import { SliceComponentProps, PrismicRichText } from "@prismicio/react";
 import { PrismicNextImage, PrismicNextLink } from "@prismicio/next";
 import VimeoPlayer from "@/app/components/VimeoPlayer";
@@ -62,9 +62,9 @@ const MediaGrid = ({ slice }: MediaGridProps): React.JSX.Element => {
       style={fullScreen ? { maxWidth: "100%", margin: 0, padding: 0 } : { maxWidth: CONTAINER_MAX_WIDTH, margin: "0 auto", padding: CONTAINER_PADDING }}
     >
       {mode === "Slider" ? (
-        <SliderLayout items={items} perView={sliderPerView} gap={gap} fullScreen={fullScreen} />
+        <SliderLayout items={items} perView={sliderPerView} gap={gap} fullScreen={fullScreen} sharedCaption={slice.primary.shared_caption} />
       ) : (
-        <GridLayout items={items} columns={configuredPerView} gap={gap} />
+        <GridLayout items={items} columns={configuredPerView} gap={gap} sharedCaption={slice.primary.shared_caption} />
       )}
 
       {Array.isArray(slice.primary.section_title) && isFilled.richText(slice.primary.section_title) && (
@@ -78,7 +78,7 @@ const MediaGrid = ({ slice }: MediaGridProps): React.JSX.Element => {
 
 export default MediaGrid;
 
-function GridLayout({ items, columns, gap }: { items: Item[]; columns: number; gap: number }) {
+function GridLayout({ items, columns, gap, sharedCaption }: { items: Item[]; columns: number; gap: number; sharedCaption: RichTextField }) {
   // Consecutive full-screen items share one full-bleed row, split evenly between them,
   // instead of each item breaking out to 100vw on its own (which causes overlap).
   const groups: { fullScreen: boolean; items: Item[] }[] = [];
@@ -110,7 +110,7 @@ function GridLayout({ items, columns, gap }: { items: Item[]; columns: number; g
             }}
           >
             {group.items.map((item, i) => (
-              <MediaItem key={i} item={item} referenceWidthPx={MAX_WIDTH_PX / group.items.length} />
+              <MediaItem key={i} item={item} referenceWidthPx={MAX_WIDTH_PX / group.items.length} fallbackCaption={sharedCaption} />
             ))}
           </div>
         ) : (
@@ -127,7 +127,7 @@ function GridLayout({ items, columns, gap }: { items: Item[]; columns: number; g
               const span = Math.min(SPAN[item.size || "medium"] ?? 1, columns);
               const referenceWidthPx = columnWidthPx * span + (span - 1) * gap * REM_PX;
               return (
-                <MediaItem key={i} item={item} style={{ gridColumn: `span ${span}` }} referenceWidthPx={referenceWidthPx} />
+                <MediaItem key={i} item={item} style={{ gridColumn: `span ${span}` }} referenceWidthPx={referenceWidthPx} fallbackCaption={sharedCaption} />
               );
             })}
           </div>
@@ -137,7 +137,7 @@ function GridLayout({ items, columns, gap }: { items: Item[]; columns: number; g
   );
 }
 
-function SliderLayout({ items, perView, gap, fullScreen }: { items: Item[]; perView: number; gap: number; fullScreen: boolean }) {
+function SliderLayout({ items, perView, gap, fullScreen, sharedCaption }: { items: Item[]; perView: number; gap: number; fullScreen: boolean; sharedCaption: RichTextField }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
   // The track lays out every slide in one continuous flex row (so the scroll-snap
@@ -248,25 +248,41 @@ function SliderLayout({ items, perView, gap, fullScreen }: { items: Item[]; perV
         )}
       </div>
 
-      {/* Captions shown below, for currently visible items */}
-      {items.slice(index * perView, index * perView + perView).map((item, i) =>
-        Array.isArray(item.caption) && isFilled.richText(item.caption) ? (
-          <div key={i} className="media-grid-caption" style={{ textAlign: "center", fontSize: CAPTION_FONT_SIZE, lineHeight: "1.8", padding: "0.75rem 1rem", color: "var(--foreground)" }}>
-            <PrismicRichText field={item.caption} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
-          </div>
-        ) : null
-      )}
+      {/* Captions shown below, for currently visible items. Items with their own
+          caption each get their own block; the shared caption renders once
+          (not once per item) when one or more visible items fall back to it. */}
+      {(() => {
+        const visibleItems = items.slice(index * perView, index * perView + perView);
+        const ownCaptionItems = visibleItems.filter((item) => Array.isArray(item.caption) && isFilled.richText(item.caption));
+        const anyFallsBackToShared = visibleItems.length > ownCaptionItems.length;
+
+        return (
+          <>
+            {ownCaptionItems.map((item, i) => (
+              <div key={i} className="media-grid-caption" style={{ textAlign: "center", fontSize: CAPTION_FONT_SIZE, lineHeight: "1.8", padding: "0.75rem 1rem", color: "var(--foreground)" }}>
+                <PrismicRichText field={item.caption} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
+              </div>
+            ))}
+            {anyFallsBackToShared && Array.isArray(sharedCaption) && isFilled.richText(sharedCaption) && (
+              <div className="media-grid-caption" style={{ textAlign: "center", fontSize: CAPTION_FONT_SIZE, lineHeight: "1.8", padding: "0.75rem 1rem", color: "var(--foreground)" }}>
+                <PrismicRichText field={sharedCaption} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
+              </div>
+            )}
+          </>
+        );
+      })()}
     </div>
   );
 }
 
-function MediaItem({ item, style, referenceWidthPx }: { item: Item; style?: React.CSSProperties; referenceWidthPx: number }): React.JSX.Element {
+function MediaItem({ item, style, referenceWidthPx, fallbackCaption }: { item: Item; style?: React.CSSProperties; referenceWidthPx: number; fallbackCaption?: RichTextField }): React.JSX.Element {
+  const caption = Array.isArray(item.caption) && isFilled.richText(item.caption) ? item.caption : fallbackCaption;
   return (
     <figure style={{ margin: 0, ...style }}>
       <ItemMedia item={item} referenceWidthPx={referenceWidthPx} />
-      {Array.isArray(item.caption) && isFilled.richText(item.caption) && (
+      {Array.isArray(caption) && isFilled.richText(caption) && (
         <div className="media-grid-caption" style={{ textAlign: "center", fontSize: CAPTION_FONT_SIZE, lineHeight: "1.8", padding: "0.75rem 1rem", color: "var(--foreground)" }}>
-          <PrismicRichText field={item.caption} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
+          <PrismicRichText field={caption} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
         </div>
       )}
     </figure>

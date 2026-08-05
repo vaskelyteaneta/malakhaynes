@@ -1,6 +1,7 @@
 import { createClient } from "@/prismicio";
 import { PrismicNextImage, PrismicNextLink } from "@prismicio/next";
 import type { SiteMode } from "@/app/lib/site-mode";
+import NavLinks from "./NavLinks";
 
 export default async function Header({ mode }: { mode: SiteMode }) {
   const client = createClient();
@@ -13,9 +14,9 @@ export default async function Header({ mode }: { mode: SiteMode }) {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        padding: "2.5rem 2rem 1.5rem",
+        padding: "1rem 2rem 1rem",
         background: "transparent",
-        gap: "1.25rem",
+        gap: "0.75rem",
       }}
     >
       <PrismicNextLink href="/">
@@ -37,21 +38,7 @@ export default async function Header({ mode }: { mode: SiteMode }) {
         )}
       </PrismicNextLink>
 
-      <nav style={{ display: "flex", gap: "2.5rem" }}>
-        {settings.data.navigation.map((item) => (
-          <PrismicNextLink
-            key={item.label}
-            field={item.link}
-            style={{
-              fontSize: "1rem",
-              color: "var(--foreground)",
-              textDecoration: "none",
-            }}
-          >
-            {item.label}
-          </PrismicNextLink>
-        ))}
-      </nav>
+      <NavLinks items={settings.data.navigation} />
     </header>
   );
 }

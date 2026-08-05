@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
+import Footer from "./components/Footer";
 import Header from "./components/Header";
 import StickyHeader from "./components/StickyHeader";
 import ThemeToggle from "./components/ThemeToggle";
@@ -37,7 +38,8 @@ export default async function RootLayout({
           <StickyHeader>
             <Header mode={mode} />
           </StickyHeader>
-          <div style={{ paddingTop: "160px" }}>{children}</div>
+          <div style={{ paddingTop: "128px", flex: "1 0 auto" }}>{children}</div>
+          <Footer />
         </body>
     </html>
   );

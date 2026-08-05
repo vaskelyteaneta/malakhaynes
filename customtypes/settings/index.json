@@ -14,6 +14,42 @@
           "thumbnails": []
         }
       },
+      "footer_text": {
+        "type": "StructuredText",
+        "config": {
+          "label": "Footer text (optional)",
+          "placeholder": "",
+          "allowTargetBlank": false,
+          "multi": "paragraph,strong,em"
+        }
+      },
+      "footer_links": {
+        "type": "Group",
+        "config": {
+          "label": "footer_links",
+          "repeat": true,
+          "fields": {
+            "label": {
+              "type": "Text",
+              "config": {
+                "label": "label",
+                "placeholder": "e.g. Instagram"
+              }
+            },
+            "link": {
+              "type": "Link",
+              "config": {
+                "label": "link",
+                "placeholder": "",
+                "select": null,
+                "allowTargetBlank": true,
+                "allowText": true,
+                "repeat": false
+              }
+            }
+          }
+        }
+      },
       "navigation": {
         "type": "Group",
         "config": {

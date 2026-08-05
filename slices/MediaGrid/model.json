@@ -12,6 +12,15 @@
       "description": "Default",
       "imageUrl": "",
       "primary": {
+        "shared_caption": {
+          "type": "StructuredText",
+          "config": {
+            "label": "Shared caption (optional — used when every item shares the same caption, instead of filling in each item's own Caption field)",
+            "placeholder": "",
+            "allowTargetBlank": false,
+            "multi": "paragraph,strong,em"
+          }
+        },
         "section_title": {
           "type": "StructuredText",
           "config": {

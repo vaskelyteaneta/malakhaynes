@@ -155,6 +155,31 @@ export interface SettingsDocumentDataNavigationItem {
   link: prismic.LinkField<string, string, unknown, prismic.FieldState, never>;
 }
 
+/**
+ * Item in *Settings → footer_links*
+ */
+export interface SettingsDocumentDataFooterLinksItem {
+  /**
+   * label field in *Settings → footer_links*
+   *
+   * - **Field Type**: Text
+   * - **Placeholder**: `e.g. Instagram`
+   * - **API ID Path**: settings.footer_links[].label
+   * - **Documentation**: https://prismic.io/docs/fields/text
+   */
+  label: prismic.KeyTextField;
+
+  /**
+   * link field in *Settings → footer_links*
+   *
+   * - **Field Type**: Link
+   * - **Placeholder**: *None*
+   * - **API ID Path**: settings.footer_links[].link
+   * - **Documentation**: https://prismic.io/docs/fields/link
+   */
+  link: prismic.LinkField<string, string, unknown, prismic.FieldState, never>;
+}
+
 type SettingsDocumentDataSlicesSlice = never;
 
 /**
@@ -171,6 +196,28 @@ interface SettingsDocumentData {
    * - **Documentation**: https://prismic.io/docs/fields/image
    */
   logo: prismic.ImageField<never>;
+
+  /**
+   * Footer text field in *Settings*
+   *
+   * - **Field Type**: Rich Text
+   * - **Placeholder**: *None*
+   * - **API ID Path**: settings.footer_text
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/fields/rich-text
+   */
+  footer_text: prismic.RichTextField;
+
+  /**
+   * footer_links field in *Settings*
+   *
+   * - **Field Type**: Group
+   * - **Placeholder**: *None*
+   * - **API ID Path**: settings.footer_links[]
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/fields/repeatable-group
+   */
+  footer_links: prismic.GroupField<Simplify<SettingsDocumentDataFooterLinksItem>>;
 
   /**
    * navigation field in *Settings*
@@ -239,6 +286,7 @@ export interface MediaGridSliceDefaultPrimaryItemsItem {
 export type MediaGridSliceDefault = prismic.SharedSliceVariation<
   "default",
   Simplify<{
+    shared_caption: prismic.RichTextField;
     section_title: prismic.RichTextField;
     display_mode: prismic.SelectField<"Grid" | "Slider">;
     items_per_row: prismic.SelectField<"1" | "2" | "3" | "4">;
@@ -292,6 +340,7 @@ declare module "@prismicio/client" {
       SettingsDocument,
       SettingsDocumentData,
       SettingsDocumentDataNavigationItem,
+      SettingsDocumentDataFooterLinksItem,
       SettingsDocumentDataSlicesSlice,
       AllDocumentTypes,
       MediaGridSlice,
