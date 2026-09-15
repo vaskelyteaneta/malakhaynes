@@ -37,11 +37,21 @@ export function proxy(request: NextRequest) {
     return response;
   }
 
+  // envMode wins over any stray cookie: once a deployment is pinned to one
+  // mode via SITE_MODE, a leftover cookie must never override it.
   const cookieMode = request.cookies.get(MODE_COOKIE)?.value;
   const mode =
-    (cookieMode === "dark" || cookieMode === "light" ? cookieMode : null) ??
     envMode ??
+    (cookieMode === "dark" || cookieMode === "light" ? cookieMode : null) ??
     (DARK_MODE_HOSTS.includes(hostname) ? "dark" : "light");
+
+  // Home differs by version: the black / Very Inner Vibrations version lands on
+  // the music page, the white / Malak Haynes version lands on the films page.
+  // Redirect the root URL (and each domain's landing) to the right one.
+  if (request.nextUrl.pathname === "/") {
+    const home = mode === "dark" ? "/music" : "/movies";
+    return NextResponse.redirect(new URL(home, request.url));
+  }
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set(MODE_HEADER, mode);
