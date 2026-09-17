@@ -72,7 +72,7 @@ const MediaGrid = ({ slice }: MediaGridProps): React.JSX.Element => {
       )}
 
       {Array.isArray(slice.primary.section_title) && isFilled.richText(slice.primary.section_title) && (
-        <div className="media-grid-caption" style={{ textAlign: "center", fontSize: CAPTION_FONT_SIZE, lineHeight: "1.8", padding: "0.75rem 1rem", color: "var(--foreground)" }}>
+        <div className="media-grid-caption" style={{ textAlign: "center", fontSize: CAPTION_FONT_SIZE, lineHeight: "1.8", padding: "0.75rem 1rem", color: "var(--foreground)", fontWeight: "bold" }}>
           <PrismicRichText field={slice.primary.section_title} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
         </div>
       )}
