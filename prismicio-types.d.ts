@@ -153,14 +153,6 @@ export interface SettingsDocumentDataNavigationItem {
    * - **Documentation**: https://prismic.io/docs/fields/link
    */
   link: prismic.LinkField<string, string, unknown, prismic.FieldState, never>;
-
-  /**
-   * Show on version field in *Settings → navigation*
-   *
-   * - **Field Type**: Select
-   * - **API ID Path**: settings.navigation[].visible_on
-   */
-  visible_on: prismic.SelectField<"Both" | "White only" | "Black only">;
 }
 
 /**
@@ -305,7 +297,6 @@ export interface MediaGridSliceDefaultPrimaryItemsItem {
   text: prismic.RichTextField;
   caption: prismic.RichTextField;
   link: prismic.LinkField;
-  link_dark: prismic.BooleanField;
   size: prismic.SelectField<"small" | "medium" | "large" | "full-screen">;
   object_fit: prismic.SelectField<"contain" | "cover" | "fill">;
   image_height: prismic.SelectField<"auto" | "300px" | "400px" | "500px" | "600px" | "700px" | "800px">;
@@ -321,7 +312,6 @@ export interface MediaGridSliceDefaultPrimaryItemsItem {
 export type MediaGridSliceDefault = prismic.SharedSliceVariation<
   "default",
   Simplify<{
-    visible_on: prismic.SelectField<"Both" | "White only" | "Black only">;
     shared_caption: prismic.RichTextField;
     section_title: prismic.RichTextField;
     display_mode: prismic.SelectField<"Grid" | "Slider">;
