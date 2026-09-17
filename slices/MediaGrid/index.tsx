@@ -1,10 +1,14 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Content, isFilled, type RichTextField } from "@prismicio/client";
+import { Content, isFilled, type RichTextField, type ImageField } from "@prismicio/client";
 import { SliceComponentProps, PrismicRichText } from "@prismicio/react";
 import { PrismicNextImage, PrismicNextLink } from "@prismicio/next";
 import VimeoPlayer from "@/app/components/VimeoPlayer";
+// Type-only import: erased at build time, so hls.js is never pulled into the
+// server bundle or loaded during SSR. The runtime library is imported lazily
+// inside CustomVideoPlayer, on the client, only when an HLS source is played.
+import type Hls from "hls.js";
 
 export type MediaGridProps = SliceComponentProps<Content.MediaGridSlice>;
 
@@ -48,7 +52,7 @@ function useIsMobile(breakpoint = MOBILE_BREAKPOINT): boolean {
 
 const MediaGrid = ({ slice }: MediaGridProps): React.JSX.Element => {
   const mode = slice.primary.display_mode || "Grid";
-  const configuredPerView = Number(slice.primary.items_per_row || "3");
+  const configuredPerView = Number(slice.primary.items_per_row || "1");
   const isMobile = useIsMobile();
   const sliderPerView = isMobile ? 1 : configuredPerView;
   const items = slice.primary.items;
@@ -92,6 +96,8 @@ function GridLayout({ items, columns, gap, sharedCaption }: { items: Item[]; col
   const availableWidthPx = MAX_WIDTH_PX - 2 * CONTAINER_PADDING_PX;
   const columnWidthPx = (availableWidthPx - (columns - 1) * gap * REM_PX) / columns;
 
+  const hasSharedCaption = Array.isArray(sharedCaption) && isFilled.richText(sharedCaption);
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: `${gap}rem` }}>
       {groups.map((group, gi) =>
@@ -110,7 +116,7 @@ function GridLayout({ items, columns, gap, sharedCaption }: { items: Item[]; col
             }}
           >
             {group.items.map((item, i) => (
-              <MediaItem key={i} item={item} referenceWidthPx={MAX_WIDTH_PX / group.items.length} fallbackCaption={sharedCaption} />
+              <MediaItem key={i} item={item} referenceWidthPx={MAX_WIDTH_PX / group.items.length} />
             ))}
           </div>
         ) : (
@@ -127,11 +133,23 @@ function GridLayout({ items, columns, gap, sharedCaption }: { items: Item[]; col
               const span = Math.min(SPAN[item.size || "medium"] ?? 1, columns);
               const referenceWidthPx = columnWidthPx * span + (span - 1) * gap * REM_PX;
               return (
-                <MediaItem key={i} item={item} style={{ gridColumn: `span ${span}` }} referenceWidthPx={referenceWidthPx} fallbackCaption={sharedCaption} />
+                <MediaItem key={i} item={item} style={{ gridColumn: `span ${span}` }} referenceWidthPx={referenceWidthPx} />
               );
             })}
           </div>
         )
+      )}
+
+      {/* Shared caption: one caption for the whole grid, not one per item.
+          Rendered once after the rows and centered — on desktop it reads as
+          sitting under the middle image; on mobile the rows collapse to a
+          single stacked column, so it naturally lands under the last image.
+          Items with their own caption still show that caption individually
+          (see MediaItem); this shared one is always present when filled. */}
+      {hasSharedCaption && (
+        <div className="media-grid-caption" style={{ textAlign: "center", fontSize: CAPTION_FONT_SIZE, lineHeight: "1.8", padding: "0.75rem 1rem", color: "var(--foreground)" }}>
+          <PrismicRichText field={sharedCaption} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
+        </div>
       )}
     </div>
   );
@@ -275,8 +293,8 @@ function SliderLayout({ items, perView, gap, fullScreen, sharedCaption }: { item
   );
 }
 
-function MediaItem({ item, style, referenceWidthPx, fallbackCaption }: { item: Item; style?: React.CSSProperties; referenceWidthPx: number; fallbackCaption?: RichTextField }): React.JSX.Element {
-  const caption = Array.isArray(item.caption) && isFilled.richText(item.caption) ? item.caption : fallbackCaption;
+function MediaItem({ item, style, referenceWidthPx }: { item: Item; style?: React.CSSProperties; referenceWidthPx: number }): React.JSX.Element {
+  const caption = item.caption;
   return (
     <figure style={{ margin: 0, ...style }}>
       <ItemMedia item={item} referenceWidthPx={referenceWidthPx} />
@@ -291,49 +309,44 @@ function MediaItem({ item, style, referenceWidthPx, fallbackCaption }: { item: I
 
 function ItemMedia({ item, referenceWidthPx }: { item: Item; referenceWidthPx: number }): React.JSX.Element | null {
   const media = renderByType(item, referenceWidthPx);
-  if (media && isFilled.link(item.link)) {
-    return (
-      <PrismicNextLink field={item.link} className="media-grid__link" target="_blank" rel="noopener noreferrer">
-        {media}
-      </PrismicNextLink>
-    );
-  }
-  return media;
+  if (!media || !isFilled.link(item.link)) return media;
+
+  // Internal (document) links stay in the same tab so navigation stays inside
+  // the site; only external web links open in a new tab.
+  const external = item.link.link_type === "Web";
+  return (
+    <PrismicNextLink
+      field={item.link}
+      className="media-grid__link"
+      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+    >
+      {media}
+    </PrismicNextLink>
+  );
 }
 
 function renderByType(item: Item, referenceWidthPx: number): React.JSX.Element | null {
-  switch (item.content_type) {
-    case "Video":
-      return isFilled.linkToMedia(item.video) ? (
-        <CustomVideoPlayer src={item.video.url} />
-      ) : null;
+  // Poster mode (Video or Embed): when a still is provided, show it instead of
+  // playing inline. ItemMedia wraps it in the item's Link, so clicking the
+  // still navigates to the page (e.g. the movie page) where the video lives.
+  if (isFilled.image(item.poster) && (item.content_type === "Video" || item.content_type === "Embed")) {
+    return <VideoPoster item={item} referenceWidthPx={referenceWidthPx} />;
+  }
 
-    case "Image": {
-      const fit = (item.object_fit || "contain") as React.CSSProperties["objectFit"];
-      const h = item.image_height || "auto";
-      // A literal pixel height (h) is a design-time value chosen at roughly
-      // referenceWidthPx wide. Converting it to an aspect-ratio instead of
-      // applying it directly means the box scales proportionally with
-      // whatever width it actually renders at, rather than staying fixed
-      // height while the width shrinks (which is what turns a landscape
-      // image square, then portrait, as the viewport narrows).
-      const heightPx = h === "auto" ? null : parseFloat(h);
-      return isFilled.image(item.image) ? (
-        <div className="media-grid-image-wrap" style={{ width: "100%", aspectRatio: heightPx ? `${referenceWidthPx} / ${heightPx}` : undefined, overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center" }}>
-          <PrismicNextImage
-            field={item.image}
-            fallbackAlt=""
-            className="media-grid-image"
-            style={{
-              width: "100%",
-              height: heightPx ? "100%" : "auto",
-              objectFit: heightPx ? fit : undefined,
-              display: "block",
-            }}
-          />
-        </div>
-      ) : null;
+  switch (item.content_type) {
+    case "Video": {
+      // No poster → play inline. A pasted external URL (.m3u8 HLS or .mp4)
+      // takes precedence over an uploaded .mp4 media file.
+      const src = isFilled.keyText(item.video_url)
+        ? item.video_url.trim()
+        : isFilled.linkToMedia(item.video)
+          ? item.video.url
+          : null;
+      return src ? <CustomVideoPlayer src={src} /> : null;
     }
+
+    case "Image":
+      return renderSizedImage(item.image, item, referenceWidthPx);
 
     case "Embed": {
       if (!isFilled.embed(item.embed) || !item.embed.html) return null;
@@ -365,9 +378,96 @@ function renderByType(item: Item, referenceWidthPx: number): React.JSX.Element |
   }
 }
 
+// Renders an image sized by the item's image_height / object_fit controls.
+// Shared by the Image content type and the Video poster still so both honour
+// the same sizing. A literal pixel height is treated as a design-time value at
+// roughly referenceWidthPx wide and converted to an aspect-ratio, so the box
+// scales proportionally with its actual rendered width instead of staying a
+// fixed height (which is what turns a landscape image square, then portrait,
+// as the viewport narrows).
+function renderSizedImage(image: ImageField, item: Item, referenceWidthPx: number): React.JSX.Element | null {
+  if (!isFilled.image(image)) return null;
+  const fit = (item.object_fit || "contain") as React.CSSProperties["objectFit"];
+  const h = item.image_height || "auto";
+  const heightPx = h === "auto" ? null : parseFloat(h);
+  // Always reserve the image's space up-front so the layout never collapses to a
+  // blank gap while the image is still loading — on a slow connection an
+  // unreserved (aspectRatio:undefined) box has zero height and the page looks
+  // like it "didn't load". For a fixed height we derive the ratio from the
+  // reference width; for "auto" we use the image's own intrinsic dimensions.
+  const dims = image.dimensions;
+  const aspectRatio = heightPx
+    ? `${referenceWidthPx} / ${heightPx}`
+    : dims?.width && dims?.height
+      ? `${dims.width} / ${dims.height}`
+      : undefined;
+  return (
+    <div className="media-grid-image-wrap" style={{ width: "100%", aspectRatio, overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center" }}>
+      <PrismicNextImage
+        field={image}
+        fallbackAlt=""
+        className="media-grid-image"
+        style={{ width: "100%", height: heightPx ? "100%" : "auto", objectFit: heightPx ? fit : undefined, display: "block" }}
+      />
+    </div>
+  );
+}
+
+// A video's still image with a centred play badge, signalling it's a video.
+// The badge is pointer-events:none so clicks fall through to ItemMedia's Link.
+function VideoPoster({ item, referenceWidthPx }: { item: Item; referenceWidthPx: number }): React.JSX.Element | null {
+  const poster = renderSizedImage(item.poster, item, referenceWidthPx);
+  if (!poster) return null;
+  return (
+    <div style={{ position: "relative" }}>
+      {poster}
+      <span aria-hidden style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+        <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "4rem", height: "4rem", borderRadius: "50%", background: "rgba(0,0,0,0.45)" }}>
+          <span style={{ width: 0, height: 0, borderTop: "12px solid transparent", borderBottom: "12px solid transparent", borderLeft: "20px solid #fff", marginLeft: 5 }} />
+        </span>
+      </span>
+    </div>
+  );
+}
+
+const isHlsSource = (src: string): boolean => /\.m3u8(\?|#|$)/i.test(src);
+
 function CustomVideoPlayer({ src }: { src: string }): React.JSX.Element {
   const ref = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
+
+  // Wire the source up here rather than via the <video src> attribute so HLS
+  // (.m3u8) streams can be routed through hls.js on browsers that lack native
+  // HLS. Plain .mp4 (and Safari, which plays HLS natively) just get the src set
+  // directly.
+  useEffect(() => {
+    const video = ref.current;
+    if (!video) return;
+
+    if (!isHlsSource(src) || video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.src = src;
+      return;
+    }
+
+    let hls: Hls | null = null;
+    let cancelled = false;
+    import("hls.js").then(({ default: HlsLib }) => {
+      if (cancelled || !ref.current) return;
+      if (HlsLib.isSupported()) {
+        hls = new HlsLib();
+        hls.loadSource(src);
+        hls.attachMedia(ref.current);
+      } else {
+        // No native HLS and hls.js unsupported — let the browser try anyway.
+        ref.current.src = src;
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      hls?.destroy();
+    };
+  }, [src]);
 
   const toggle = () => {
     const v = ref.current;
@@ -378,7 +478,7 @@ function CustomVideoPlayer({ src }: { src: string }): React.JSX.Element {
 
   return (
     <div style={{ position: "relative" }}>
-      <video ref={ref} src={src} controls={playing} playsInline onEnded={() => setPlaying(false)} style={{ width: "100%", display: "block" }} />
+      <video ref={ref} controls={playing} playsInline onEnded={() => setPlaying(false)} style={{ width: "100%", display: "block" }} />
       {!playing && (
         <button
           type="button"

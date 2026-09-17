@@ -1,9 +1,7 @@
-import { headers } from "next/headers";
-
 export type SiteMode = "light" | "dark";
 
-// Reads the mode proxy.ts decided for this request (by domain, or ?dark/?light override).
+// Malak Haynes is always the light site — a fully separate deployment from
+// Very Inner Vibrations (which is always dark; see its own site-mode.ts).
 export async function getSiteMode(): Promise<SiteMode> {
-  const headersList = await headers();
-  return headersList.get("x-site-mode") === "dark" ? "dark" : "light";
+  return "light";
 }

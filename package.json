@@ -16,6 +16,7 @@
     "@splidejs/splide": "^4.1.4",
     "@types/vimeo__player": "^2.18.3",
     "@vimeo/player": "^2.30.4",
+    "hls.js": "^1.6.17",
     "next": "16.2.9",
     "react": "19.2.4",
     "react-dom": "19.2.4"

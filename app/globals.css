@@ -36,6 +36,36 @@ html, body {
   overflow: hidden !important;
 }
 
+/* Theme toggle: top-right on desktop, bottom-center on mobile. */
+.theme-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 200;
+}
+@media (max-width: 768px) {
+  /* In normal flow, centered, just above the footer — no longer floating over
+     the footer's links. */
+  .theme-toggle {
+    position: static;
+    margin: 0 auto 1.5rem;
+    transform: none;
+  }
+}
+
+/* Clickable media only: items wrapped in a Link get this class, so the hover
+   affordance applies only to "choosable" items. On hover the image/video greys
+   out (and dims slightly) to invite the click. Non-linked items are unaffected. */
+.media-grid__link img,
+.media-grid__link video {
+  transition: filter 0.35s ease, opacity 0.35s ease;
+}
+.media-grid__link:hover img,
+.media-grid__link:hover video {
+  filter: grayscale(100%);
+  opacity: 0.85;
+}
+
 /* Mobile: collapse the media grid to a single stacked column instead of
    side-by-side, and let items that spanned multiple columns fall back to
    spanning just the one column that remains. */

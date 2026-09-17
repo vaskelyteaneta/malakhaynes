@@ -45,7 +45,7 @@
             "label": "Items per row (Grid) / slides per view (Slider)",
             "placeholder": "",
             "options": ["1", "2", "3", "4"],
-            "default_value": "3"
+            "default_value": "1"
           }
         },
         "gaps": {
@@ -73,7 +73,15 @@
               },
               "video": {
                 "type": "Link",
-                "config": { "label": "Video file (.mp4)", "placeholder": "Upload or select an mp4", "select": "media" }
+                "config": { "label": "Video file (.mp4 upload)", "placeholder": "Upload or select an mp4", "select": "media" }
+              },
+              "video_url": {
+                "type": "Text",
+                "config": { "label": "Video URL (.m3u8 HLS stream or .mp4) — paste an external link; overrides the uploaded file above", "placeholder": "https://…/playlist.m3u8" }
+              },
+              "poster": {
+                "type": "Image",
+                "config": { "label": "Poster / still image (Video) — when set, the grid shows this still and clicking it follows the item's Link instead of playing inline", "constraint": {}, "thumbnails": [] }
               },
               "image": {
                 "type": "Image",

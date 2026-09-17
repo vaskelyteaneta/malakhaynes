@@ -153,6 +153,14 @@ export interface SettingsDocumentDataNavigationItem {
    * - **Documentation**: https://prismic.io/docs/fields/link
    */
   link: prismic.LinkField<string, string, unknown, prismic.FieldState, never>;
+
+  /**
+   * Show on version field in *Settings → navigation*
+   *
+   * - **Field Type**: Select
+   * - **API ID Path**: settings.navigation[].visible_on
+   */
+  visible_on: prismic.SelectField<"Both" | "White only" | "Black only">;
 }
 
 /**
@@ -196,6 +204,30 @@ interface SettingsDocumentData {
    * - **Documentation**: https://prismic.io/docs/fields/image
    */
   logo: prismic.ImageField<never>;
+
+  /**
+   * Intro video field in *Settings*
+   *
+   * - **Field Type**: Link to Media
+   * - **API ID Path**: settings.intro_video
+   */
+  intro_video: prismic.LinkToMediaField;
+
+  /**
+   * Intro video URL field in *Settings*
+   *
+   * - **Field Type**: Text
+   * - **API ID Path**: settings.intro_video_url
+   */
+  intro_video_url: prismic.KeyTextField;
+
+  /**
+   * Intro frequency field in *Settings*
+   *
+   * - **Field Type**: Select
+   * - **API ID Path**: settings.intro_frequency
+   */
+  intro_frequency: prismic.SelectField<"Once per session" | "Every visit">;
 
   /**
    * Footer text field in *Settings*
@@ -266,11 +298,14 @@ export type AllDocumentTypes = PageDocument | SettingsDocument;
 export interface MediaGridSliceDefaultPrimaryItemsItem {
   content_type: prismic.SelectField<"Video" | "Image" | "Embed" | "Text">;
   video: prismic.LinkToMediaField;
+  video_url: prismic.KeyTextField;
+  poster: prismic.ImageField;
   image: prismic.ImageField;
   embed: prismic.EmbedField;
   text: prismic.RichTextField;
   caption: prismic.RichTextField;
   link: prismic.LinkField;
+  link_dark: prismic.BooleanField;
   size: prismic.SelectField<"small" | "medium" | "large" | "full-screen">;
   object_fit: prismic.SelectField<"contain" | "cover" | "fill">;
   image_height: prismic.SelectField<"auto" | "300px" | "400px" | "500px" | "600px" | "700px" | "800px">;
@@ -286,6 +321,7 @@ export interface MediaGridSliceDefaultPrimaryItemsItem {
 export type MediaGridSliceDefault = prismic.SharedSliceVariation<
   "default",
   Simplify<{
+    visible_on: prismic.SelectField<"Both" | "White only" | "Black only">;
     shared_caption: prismic.RichTextField;
     section_title: prismic.RichTextField;
     display_mode: prismic.SelectField<"Grid" | "Slider">;

@@ -19,8 +19,16 @@ export default function VimeoPlayer({ html }: { html: string }) {
     : null;
 
   useEffect(() => {
-    if (!iframeRef.current || !src) return;
-    const player = new Player(iframeRef.current);
+    const iframe = iframeRef.current;
+    if (!iframe || !src) return;
+    // Force the iframe to (re)load its source. On client-side route changes
+    // React can reuse a previous VimeoPlayer's iframe DOM node — whose player was
+    // already destroyed on unmount — and, seeing the same src, never re-requests
+    // it, leaving the player blank. Reassigning src guarantees a fresh load on
+    // every mount (that's why it worked on a full page load but not on an
+    // in-app click-through).
+    iframe.src = src;
+    const player = new Player(iframe);
     playerRef.current = player;
     player.getDuration().then(d => setDuration(d));
     player.on("play", () => setPlaying(true));
@@ -76,9 +84,10 @@ export default function VimeoPlayer({ html }: { html: string }) {
       onMouseLeave={() => setHovered(false)}
     >
       <div style={{ position: "relative", paddingBottom: "56.25%", height: 0, overflow: "hidden" }}>
+        {/* src is intentionally set in the effect (not here) so it loads exactly
+            once per mount and reliably (re)loads across client-side navigations. */}
         <iframe
           ref={iframeRef}
-          src={src}
           allow="autoplay; fullscreen; picture-in-picture"
           style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0 }}
         />

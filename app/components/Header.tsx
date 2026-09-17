@@ -19,7 +19,7 @@ export default async function Header({ mode }: { mode: SiteMode }) {
         gap: "0.75rem",
       }}
     >
-      <PrismicNextLink href="/">
+      <PrismicNextLink href={isDark ? "/music" : "/movies"}>
         {isDark ? (
           // Placeholder wordmark for Very Inner Vibrations until a real logo is designed.
           <span
