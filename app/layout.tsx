@@ -60,8 +60,6 @@ export default async function RootLayout({
               this, components like MediaGrid/VimeoPlayer keep their old DOM
               refs and state across the refresh and can render blank. */}
           <div key={mode} style={{ paddingTop: "128px", flex: "1 0 auto" }}>{children}</div>
-          {/* Placed just before the footer so on mobile (where it's in normal
-              flow) it sits above the footer instead of overlapping its links. */}
           <ThemeToggle mode={mode} />
           <Footer />
         </body>
