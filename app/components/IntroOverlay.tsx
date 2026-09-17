@@ -8,17 +8,16 @@ import type { SiteMode } from "@/app/lib/site-mode";
 // bundle. The runtime library loads lazily on the client, only for .m3u8.
 import type Hls from "hls.js";
 
-const SEEN_COOKIE = "intro_seen";
+const SEEN_KEY = "intro_seen";
 
+// sessionStorage: cleared when the tab closes, and scoped to that tab alone —
+// opening the site in a new tab replays the intro there.
 function hasSeenIntro(): boolean {
-  return typeof document !== "undefined" && document.cookie.split("; ").some((c) => c.startsWith(`${SEEN_COOKIE}=`));
+  return typeof window !== "undefined" && sessionStorage.getItem(SEEN_KEY) === "1";
 }
 
-// Session cookie (no expiry): cleared when the browser session ends, but —
-// unlike sessionStorage — shared across all tabs. So opening a film/link in a
-// new tab doesn't reset the flag and replay the intro.
 function markIntroSeen(): void {
-  document.cookie = `${SEEN_COOKIE}=1; path=/; SameSite=Lax`;
+  sessionStorage.setItem(SEEN_KEY, "1");
 }
 
 // Auto-dismiss the intro after this long even without any interaction.
