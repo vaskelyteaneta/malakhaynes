@@ -36,13 +36,21 @@ html, body {
   overflow: hidden !important;
 }
 
-/* Theme toggle: fixed bottom-center, visible immediately without scrolling. */
+/* Theme toggle: top-right on desktop, bottom-center on mobile. */
 .theme-toggle {
   position: fixed;
-  bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 1rem;
+  right: 1rem;
   z-index: 200;
+}
+@media (max-width: 768px) {
+  /* In normal flow, centered, just above the footer — no longer floating over
+     the footer's links. */
+  .theme-toggle {
+    position: static;
+    margin: 0 auto 1.5rem;
+    transform: none;
+  }
 }
 
 /* Clickable media only: items wrapped in a Link get this class, so the hover
