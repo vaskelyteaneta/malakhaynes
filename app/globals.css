@@ -25,6 +25,11 @@
 }
 
 
+/* Do NOT add overflow-x (or overflow) here. iOS Safari anchors descendant
+   position:fixed elements (ThemeToggle, IntroOverlay) to the nearest
+   overflow-clipped ancestor instead of the viewport, which breaks
+   ThemeToggle's fixed bottom-center mobile position. Clip horizontal
+   overflow on the content wrapper in layout.tsx instead. */
 html, body {
   background: var(--background) !important;
   color: var(--foreground);
@@ -36,7 +41,9 @@ html, body {
 }
 
 /* Theme toggle: fixed top-right on desktop, fixed bottom-center on mobile
-   (always visible without scrolling on both — only the corner changes). */
+   (always visible without scrolling on both — only the corner changes).
+   Keep position: fixed on both — do not switch mobile to static/absolute,
+   that was tried and explicitly reverted per user request. */
 .theme-toggle {
   position: fixed;
   top: 1rem;
