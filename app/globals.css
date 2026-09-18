@@ -36,7 +36,8 @@ html, body {
   overflow: hidden !important;
 }
 
-/* Theme toggle: top-right on desktop, bottom-center on mobile. */
+/* Theme toggle: fixed top-right on desktop, fixed bottom-center on mobile
+   (always visible without scrolling on both — only the corner changes). */
 .theme-toggle {
   position: fixed;
   top: 1rem;
@@ -44,12 +45,12 @@ html, body {
   z-index: 200;
 }
 @media (max-width: 768px) {
-  /* In normal flow, centered, just above the footer — no longer floating over
-     the footer's links. */
   .theme-toggle {
-    position: static;
-    margin: 0 auto 1.5rem;
-    transform: none;
+    top: auto;
+    right: auto;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
   }
 }
 
