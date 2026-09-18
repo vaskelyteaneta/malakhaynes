@@ -59,9 +59,13 @@ export default async function RootLayout({
               load) remounts every Client Component under here fresh. Without
               this, components like MediaGrid/VimeoPlayer keep their old DOM
               refs and state across the refresh and can render blank. */}
-          <div key={mode} style={{ paddingTop: "128px", flex: "1 0 auto" }}>{children}</div>
-          <ThemeToggle mode={mode} />
+          <div key={mode} style={{ paddingTop: "128px", flex: "1 0 auto", overflowX: "hidden" }}>{children}</div>
           <Footer />
+          {/* Direct child of <body>, outside anything with overflow set — iOS
+              Safari makes position:fixed descendants stick to the nearest
+              overflow-clipped ancestor instead of the viewport, which is why
+              this must not be nested inside the overflow-x:hidden div above. */}
+          <ThemeToggle mode={mode} />
         </body>
     </html>
   );

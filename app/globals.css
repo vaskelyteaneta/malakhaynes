@@ -29,7 +29,6 @@ html, body {
   background: var(--background) !important;
   color: var(--foreground);
   font-family: var(--font-cormorant-garamond), 'Cormorant Garamond', Georgia, serif;
-  overflow-x: hidden;
 }
 
 .splide__track {
