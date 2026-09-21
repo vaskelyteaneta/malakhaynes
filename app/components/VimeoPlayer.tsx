@@ -98,6 +98,35 @@ export default function VimeoPlayer({ html }: { html: string }) {
         {/* Overlays to cover letterbox bars, matching the site's current background */}
         <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "8%", background: "var(--background)", zIndex: 2 }} />
         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "8%", background: "var(--background)", zIndex: 2 }} />
+
+        {/* Corner masks: Vimeo's video is its own GPU-composited layer, which
+            some browsers let paint straight through a clip-path/border-radius
+            clip on the wrapper (or even on the iframe itself) — confirmed via
+            hit-testing that the clip region is registered correctly, but the
+            video still visibly paints past it. These paint a solid quarter-
+            circle over each corner instead, which works no matter what the
+            video layer does, since it doesn't depend on clipping it at all.
+            Hidden via CSS unless Settings > Style > "Rounded media corners"
+            is on. */}
+        {(["top left", "top right", "bottom left", "bottom right"] as const).map((corner) => {
+          const [v, h] = corner.split(" ") as ["top" | "bottom", "left" | "right"];
+          return (
+            <div
+              key={corner}
+              className="media-grid-video-corner-mask"
+              style={{
+                position: "absolute",
+                [v]: 0,
+                [h]: 0,
+                width: 30,
+                height: 30,
+                background: `radial-gradient(circle at ${corner}, transparent 30px, var(--background) 30px)`,
+                zIndex: 3,
+                pointerEvents: "none",
+              }}
+            />
+          );
+        })}
       </div>
 
       {/* Play/pause overlay */}

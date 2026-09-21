@@ -113,6 +113,12 @@ html, body {
   border-radius: 30px;
   clip-path: inset(0 round 30px);
 }
+.media-grid-video-corner-mask {
+  display: none;
+}
+[data-rounded-media="true"] .media-grid-video-corner-mask {
+  display: block;
+}
 
 /* Mobile: collapse the media grid to a single stacked column instead of
    side-by-side, and let items that spanned multiple columns fall back to
