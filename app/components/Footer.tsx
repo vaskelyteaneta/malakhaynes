@@ -21,7 +21,7 @@ export default async function Footer() {
       }}
     >
       {isFilled.richText(settings.data.footer_text) && (
-        <div style={{ fontSize: "0.9rem", lineHeight: "1.6" }}>
+        <div className="footer-text" style={{ fontSize: "0.9rem", lineHeight: "1.6" }}>
           <PrismicRichText field={settings.data.footer_text} />
         </div>
       )}
@@ -34,6 +34,7 @@ export default async function Footer() {
                 field={item.link}
                 target="_blank"
                 rel="noopener noreferrer"
+                className="footer-link"
                 style={{ fontSize: "0.9rem", color: "var(--foreground)", textDecoration: "none" }}
               >
                 {item.label}
