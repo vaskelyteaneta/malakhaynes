@@ -13,15 +13,13 @@ export default function BackButton() {
   const router = useRouter();
   const [show, setShow] = useState(false);
 
-  // Only shown when the visitor actually arrived from another page on this
-  // site — a direct link, bookmark, or external share has nothing to go
-  // "back" to within the app.
+  // Only shown when there's an actual previous entry in this tab's history to
+  // go back to — hidden on a direct link or a fresh tab. history.length grows
+  // with every client-side navigation (Next's <Link> uses pushState), so this
+  // works for in-app clicks too; document.referrer would not, since it only
+  // reflects real browser navigations, never a client-side route change.
   useEffect(() => {
-    try {
-      setShow(new URL(document.referrer).origin === window.location.origin);
-    } catch {
-      setShow(false);
-    }
+    setShow(window.history.length > 1);
   }, []);
 
   if (!show) return null;
