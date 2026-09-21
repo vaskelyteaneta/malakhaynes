@@ -93,25 +93,25 @@ html, body {
 }
 
 /* Rounded media corners: Settings > Style > "Rounded media corners" toggle.
-   Covers every media type — images/video posters (.media-grid-image-wrap,
-   already clips via overflow:hidden) and video/embeds (.media-grid-video-wrap,
-   overflow:hidden added here since it isn't needed when square). The
-   -webkit-mask-image is a Safari-specific nudge: a GPU-composited <video>
-   inside a cross-origin iframe (Vimeo) can ignore a plain border-radius +
-   overflow:hidden clip on its ancestor there. But clipping via an ancestor
-   turns out unreliable more broadly than just Safari, so the rule below also
-   rounds the iframe/video element directly — browsers consistently respect
-   border-radius on the element itself, which is what actually makes this
-   work across the board. */
+   Covers every media type — images/video posters (.media-grid-image-wrap)
+   and video/embeds (.media-grid-video-wrap). Neither border-radius+
+   overflow:hidden nor a mask-image on the ancestor reliably clips a Vimeo
+   iframe: its video content gets promoted to its own GPU-composited layer,
+   which can bypass an ancestor's clip (and even the iframe's own
+   border-radius) in some browsers. clip-path is a real compositor-level
+   clip rather than a scroll/overflow clip, so it holds up against layer
+   promotion — applied on both the wrapper and the iframe/video itself as
+   belt-and-suspenders. */
 [data-rounded-media="true"] .media-grid-image-wrap,
 [data-rounded-media="true"] .media-grid-video-wrap {
   border-radius: 30px;
   overflow: hidden;
-  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  clip-path: inset(0 round 30px);
 }
 [data-rounded-media="true"] .media-grid-video-wrap iframe,
 [data-rounded-media="true"] .media-grid-video-wrap video {
   border-radius: 30px;
+  clip-path: inset(0 round 30px);
 }
 
 /* Mobile: collapse the media grid to a single stacked column instead of
