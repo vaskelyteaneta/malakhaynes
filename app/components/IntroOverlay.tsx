@@ -21,9 +21,9 @@ function markIntroSeen(): void {
 }
 
 // Auto-dismiss the intro after this long even without any interaction.
-const AUTO_DISMISS_MS = 2000;
+const AUTO_DISMISS_MS = 3000;
 // Fade-out duration; kept in sync with the CSS transition below.
-const FADE_MS = 700;
+const FADE_MS = 1500;
 
 const isHlsSource = (src: string): boolean => /\.m3u8(\?|#|$)/i.test(src);
 
@@ -85,12 +85,23 @@ export default function IntroOverlay({
     };
   }, [show, src]);
 
-  // Lock scroll, dismiss on interaction, and auto-dismiss after a timeout.
+  // Scroll stays locked only while the intro is fully up. It unlocks the
+  // moment the fade starts so the scroll that dismissed it takes effect
+  // right away, instead of the page sitting frozen for the whole fade.
   useEffect(() => {
-    if (!show) return;
+    if (!show || closing) return;
 
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [show, closing]);
+
+  // Dismiss on interaction, and auto-dismiss after a timeout.
+  useEffect(() => {
+    if (!show || closing) return;
 
     const dismiss = () => setClosing(true);
 
@@ -101,9 +112,8 @@ export default function IntroOverlay({
     return () => {
       window.clearTimeout(autoTimer);
       events.forEach((e) => window.removeEventListener(e, dismiss));
-      document.body.style.overflow = prevOverflow;
     };
-  }, [show]);
+  }, [show, closing]);
 
   // After the fade completes, unmount fully.
   useEffect(() => {
