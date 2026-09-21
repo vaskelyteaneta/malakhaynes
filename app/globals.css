@@ -96,16 +96,22 @@ html, body {
    Covers every media type — images/video posters (.media-grid-image-wrap,
    already clips via overflow:hidden) and video/embeds (.media-grid-video-wrap,
    overflow:hidden added here since it isn't needed when square). The
-   -webkit-mask-image is load-bearing, not decorative: Safari lets a
-   GPU-composited <video> inside a cross-origin iframe (Vimeo) ignore a
-   plain border-radius + overflow:hidden clip on its ancestor, so the embed
-   stays visibly square without it. A mask forces Safari to actually
-   composite the clip instead of just computing it. */
+   -webkit-mask-image is a Safari-specific nudge: a GPU-composited <video>
+   inside a cross-origin iframe (Vimeo) can ignore a plain border-radius +
+   overflow:hidden clip on its ancestor there. But clipping via an ancestor
+   turns out unreliable more broadly than just Safari, so the rule below also
+   rounds the iframe/video element directly — browsers consistently respect
+   border-radius on the element itself, which is what actually makes this
+   work across the board. */
 [data-rounded-media="true"] .media-grid-image-wrap,
 [data-rounded-media="true"] .media-grid-video-wrap {
   border-radius: 30px;
   overflow: hidden;
   -webkit-mask-image: -webkit-radial-gradient(white, black);
+}
+[data-rounded-media="true"] .media-grid-video-wrap iframe,
+[data-rounded-media="true"] .media-grid-video-wrap video {
+  border-radius: 30px;
 }
 
 /* Mobile: collapse the media grid to a single stacked column instead of
