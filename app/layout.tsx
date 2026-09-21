@@ -36,6 +36,9 @@ export default async function RootLayout({
   const introSrc =
     settings.data.intro_video_url?.trim() ||
     (isFilled.linkToMedia(settings.data.intro_video) ? settings.data.intro_video.url : null);
+  // Video, then image, then a plain color splash (just the background +
+  // logo) — "Off" is the only way to skip the intro splash entirely now.
+  const showIntro = settings.data.intro_frequency !== "Off";
 
   return (
     <html
@@ -44,9 +47,10 @@ export default async function RootLayout({
       className={`${cormorantGaramond.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-          {introSrc && (
+          {showIntro && (
             <IntroOverlay
               src={introSrc}
+              image={settings.data.intro_image}
               mode={mode}
               logo={settings.data.logo}
               frequency={settings.data.intro_frequency}

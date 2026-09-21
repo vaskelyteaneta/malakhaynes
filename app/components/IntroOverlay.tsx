@@ -2,7 +2,7 @@
 
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { PrismicNextImage } from "@prismicio/next";
-import type { ImageField } from "@prismicio/client";
+import { isFilled, type ImageField } from "@prismicio/client";
 import type { SiteMode } from "@/app/lib/site-mode";
 // Type-only import: erased at build time so hls.js is never in the server
 // bundle. The runtime library loads lazily on the client, only for .m3u8.
@@ -29,14 +29,18 @@ const isHlsSource = (src: string): boolean => /\.m3u8(\?|#|$)/i.test(src);
 
 export default function IntroOverlay({
   src,
+  image,
   mode,
   logo,
   frequency,
 }: {
-  src: string;
+  // Video wins if set; otherwise falls back to the image; otherwise the
+  // splash is just the site's plain background color behind the logo.
+  src: string | null;
+  image: ImageField;
   mode: SiteMode;
   logo: ImageField;
-  frequency: "Once per session" | "Every visit" | null;
+  frequency: "Once per session" | "Every visit" | "Off" | null;
 }) {
   const [show, setShow] = useState(true);
   const [closing, setClosing] = useState(false);
@@ -54,8 +58,9 @@ export default function IntroOverlay({
   }, [frequency]);
 
   // Wire the video source (HLS via hls.js where needed) and start playback.
+  // No-op when there's no video (image-only or plain-color splash).
   useEffect(() => {
-    if (!show) return;
+    if (!show || !src) return;
     const video = videoRef.current;
     if (!video) return;
 
@@ -141,14 +146,27 @@ export default function IntroOverlay({
         overflow: "hidden",
       }}
     >
-      <video
-        ref={videoRef}
-        muted
-        autoPlay
-        loop
-        playsInline
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
-      />
+      {src ? (
+        <video
+          ref={videoRef}
+          muted
+          autoPlay
+          loop
+          playsInline
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+        />
+      ) : (
+        isFilled.image(image) && (
+          <PrismicNextImage
+            field={image}
+            fallbackAlt=""
+            fill
+            style={{ objectFit: "cover" }}
+          />
+        )
+        // Neither video nor image: the div's own background color is the
+        // whole splash, with just the logo/wordmark over it.
+      )}
 
       {/* Brand logo over the video: image for Malak (light), text wordmark for
           Very Inner Vibrations (dark), matching the site header. */}
