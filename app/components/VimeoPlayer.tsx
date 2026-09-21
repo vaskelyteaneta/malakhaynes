@@ -141,8 +141,12 @@ export default function VimeoPlayer({ html }: { html: string }) {
         )}
       </div>
 
-      {/* Controls bar — inside video, above white overlay, hover only */}
-      <div style={{ position: "absolute", bottom: "9%", left: 0, right: 0, zIndex: 5, opacity: hovered ? 1 : 0, transition: "opacity 0.2s", padding: "0 12px 8px" }}>
+      {/* Controls bar — inside video, above white overlay, hover only. Side
+          padding (34px) is deliberately wider than the 30px corner-mask
+          radius so the seek bar never reaches into the rounded corners —
+          otherwise its straight edge cuts across the curve and looks like an
+          unrounded frame laid over the video. */}
+      <div style={{ position: "absolute", bottom: "9%", left: 0, right: 0, zIndex: 5, opacity: hovered ? 1 : 0, transition: "opacity 0.2s", padding: "0 34px 8px" }}>
         <div style={{ color: "#fff", fontSize: "0.75rem", fontFamily: "monospace", textShadow: "0 1px 4px rgba(0,0,0,0.8)", marginBottom: 6 }}>
           {fmt(currentTime)} / {fmt(duration)}
         </div>
