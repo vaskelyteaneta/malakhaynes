@@ -26,10 +26,10 @@
 
 
 /* Do NOT add overflow-x (or overflow) here. iOS Safari anchors descendant
-   position:fixed elements (ThemeToggle, IntroOverlay) to the nearest
-   overflow-clipped ancestor instead of the viewport, which breaks
-   ThemeToggle's fixed bottom-center mobile position. Clip horizontal
-   overflow on the content wrapper in layout.tsx instead. */
+   position:fixed elements (ThemeToggle, IntroOverlay, BackButton) to the
+   nearest overflow-clipped ancestor instead of the viewport, which breaks
+   their fixed positioning. Clip horizontal overflow on the content wrapper
+   in layout.tsx instead. */
 html, body {
   background: var(--background) !important;
   color: var(--foreground);
@@ -58,6 +58,26 @@ html, body {
     left: 50%;
     transform: translateX(-50%);
   }
+}
+
+/* Back button: fixed bottom-left on every project page, on every screen
+   size — bottom-left rather than bottom-center so it never sits on top of
+   .theme-toggle's mobile position. Rendered via a portal (see
+   BackButton.tsx), so this must stay position: fixed, same reasoning as
+   .theme-toggle above. */
+.back-button {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 200;
+  background: var(--background);
+  color: var(--foreground);
+  border: 1px solid rgba(128, 128, 128, 0.5);
+  border-radius: 999px;
+  padding: 0.5rem 1.1rem;
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
 }
 
 /* Clickable media only: items wrapped in a Link get this class, so the hover
