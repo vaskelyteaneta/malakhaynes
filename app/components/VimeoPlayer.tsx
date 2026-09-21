@@ -79,12 +79,15 @@ export default function VimeoPlayer({ html }: { html: string }) {
   return (
     <div
       ref={containerRef}
-      className="media-grid-video-wrap"
       style={{ position: "relative" }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <div style={{ position: "relative", paddingBottom: "56.25%", height: 0, overflow: "hidden" }}>
+      {/* The rounding class goes on this inner div, not the outer one above —
+          this is the element with the actual clipped box (overflow:hidden +
+          the padding-bottom aspect-ratio trick); the outer div has no size or
+          background of its own, so rounding it is visually a no-op. */}
+      <div className="media-grid-video-wrap" style={{ position: "relative", paddingBottom: "56.25%", height: 0, overflow: "hidden" }}>
         {/* src is intentionally set in the effect (not here) so it loads exactly
             once per mount and reliably (re)loads across client-side navigations. */}
         <iframe
