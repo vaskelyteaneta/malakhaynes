@@ -41,6 +41,7 @@ export default async function RootLayout({
     <html
       lang="en"
       data-theme={mode}
+      data-rounded-media={settings.data.rounded_media ? "true" : undefined}
       className={`${cormorantGaramond.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">

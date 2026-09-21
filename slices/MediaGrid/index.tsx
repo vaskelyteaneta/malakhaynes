@@ -353,7 +353,7 @@ function renderByType(item: Item, referenceWidthPx: number): React.JSX.Element |
       if (item.embed.html.includes("vimeo.com/video/")) {
         return <VimeoPlayer html={item.embed.html} />;
       }
-      return <div style={{ position: "relative", paddingBottom: "56.25%", height: 0, overflow: "hidden" }}>
+      return <div className="media-grid-video-wrap" style={{ position: "relative", paddingBottom: "56.25%", height: 0, overflow: "hidden" }}>
         <div style={{ position: "absolute", inset: 0 }} dangerouslySetInnerHTML={{ __html: item.embed.html.replace("<iframe", '<iframe style="width:100%;height:100%;position:absolute;top:0;left:0"') }} />
       </div>;
     }
@@ -477,7 +477,7 @@ function CustomVideoPlayer({ src }: { src: string }): React.JSX.Element {
   };
 
   return (
-    <div style={{ position: "relative" }}>
+    <div className="media-grid-video-wrap" style={{ position: "relative" }}>
       <video ref={ref} controls={playing} playsInline onEnded={() => setPlaying(false)} style={{ width: "100%", display: "block" }} />
       {!playing && (
         <button

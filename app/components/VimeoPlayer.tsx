@@ -79,6 +79,7 @@ export default function VimeoPlayer({ html }: { html: string }) {
   return (
     <div
       ref={containerRef}
+      className="media-grid-video-wrap"
       style={{ position: "relative" }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
