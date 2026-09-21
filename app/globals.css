@@ -95,11 +95,17 @@ html, body {
 /* Rounded media corners: Settings > Style > "Rounded media corners" toggle.
    Covers every media type — images/video posters (.media-grid-image-wrap,
    already clips via overflow:hidden) and video/embeds (.media-grid-video-wrap,
-   overflow:hidden added here since it isn't needed when square). */
+   overflow:hidden added here since it isn't needed when square). The
+   -webkit-mask-image is load-bearing, not decorative: Safari lets a
+   GPU-composited <video> inside a cross-origin iframe (Vimeo) ignore a
+   plain border-radius + overflow:hidden clip on its ancestor, so the embed
+   stays visibly square without it. A mask forces Safari to actually
+   composite the clip instead of just computing it. */
 [data-rounded-media="true"] .media-grid-image-wrap,
 [data-rounded-media="true"] .media-grid-video-wrap {
   border-radius: 30px;
   overflow: hidden;
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
 }
 
 /* Mobile: collapse the media grid to a single stacked column instead of
