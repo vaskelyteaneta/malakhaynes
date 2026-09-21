@@ -225,14 +225,6 @@ interface SettingsDocumentData {
   intro_image: prismic.ImageField<never>;
 
   /**
-   * Intro frequency field in *Settings*
-   *
-   * - **Field Type**: Select
-   * - **API ID Path**: settings.intro_frequency
-   */
-  intro_frequency: prismic.SelectField<"Once per session" | "Every visit" | "Off">;
-
-  /**
    * Footer text field in *Settings*
    *
    * - **Field Type**: Rich Text

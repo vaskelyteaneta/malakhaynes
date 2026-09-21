@@ -105,15 +105,6 @@
           "constraint": {},
           "thumbnails": []
         }
-      },
-      "intro_frequency": {
-        "type": "Select",
-        "config": {
-          "label": "Intro plays — \"Off\" disables the splash entirely. Otherwise it always shows: video, then image, then just the plain background color if both are empty",
-          "placeholder": "",
-          "options": ["Once per session", "Every visit", "Off"],
-          "default_value": "Once per session"
-        }
       }
     }
   }

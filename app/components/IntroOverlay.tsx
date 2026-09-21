@@ -32,7 +32,6 @@ export default function IntroOverlay({
   image,
   mode,
   logo,
-  frequency,
 }: {
   // Video wins if set; otherwise falls back to the image; otherwise the
   // splash is just the site's plain background color behind the logo.
@@ -40,22 +39,21 @@ export default function IntroOverlay({
   image: ImageField;
   mode: SiteMode;
   logo: ImageField;
-  frequency: "Once per session" | "Every visit" | "Off" | null;
 }) {
   const [show, setShow] = useState(true);
   const [closing, setClosing] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Decide visibility before first paint to avoid a flash of the splash for
-  // visitors who've already seen it this session.
+  // visitors who've already seen it this session. Always once-per-session —
+  // no editor-facing control for this.
   useLayoutEffect(() => {
-    if (frequency === "Every visit") return;
     if (hasSeenIntro()) {
       setShow(false);
       return;
     }
     markIntroSeen();
-  }, [frequency]);
+  }, []);
 
   // Wire the video source (HLS via hls.js where needed) and start playback.
   // No-op when there's no video (image-only or plain-color splash).
