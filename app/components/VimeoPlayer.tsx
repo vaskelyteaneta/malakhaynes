@@ -3,6 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import Player from "@vimeo/player";
 
+// The film is wider than the 16:9 box, so Vimeo letterboxes it: this much of
+// the box's height at the top and at the bottom is empty, covered by
+// background-coloured strips. The visible film therefore starts this far down
+// and ends this far up — which is where the rounded corners have to go, not at
+// the box's own corners (those sit in the blank strip, where rounding is
+// invisible against the page).
+const LETTERBOX = "8%";
+
 export default function VimeoPlayer({ html }: { html: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -96,22 +104,27 @@ export default function VimeoPlayer({ html }: { html: string }) {
           style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0 }}
         />
         {/* Overlays to cover letterbox bars, matching the site's current background */}
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "8%", background: "var(--background)", zIndex: 2 }} />
-        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "8%", background: "var(--background)", zIndex: 2 }} />
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: LETTERBOX, background: "var(--background)", zIndex: 2 }} />
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: LETTERBOX, background: "var(--background)", zIndex: 2 }} />
 
         {/* Corner masks: Vimeo's video is its own GPU-composited layer, which
             some browsers let paint straight through a clip-path/border-radius
-            clip on the wrapper (or even on the iframe itself) — confirmed via
-            hit-testing that the clip region is registered correctly, but the
-            video still visibly paints past it. These paint a solid quarter-
-            circle over each corner instead, which works no matter what the
-            video layer does, since it doesn't depend on clipping it at all.
+            clip on the wrapper (or even on the iframe itself), so the film
+            keeps its square corners however the box is clipped. These paint a
+            background-coloured quarter-circle over each corner of the film
+            instead, which works whatever the video layer does.
+
+            Offset vertically by LETTERBOX so they sit on the corners of the
+            visible film, not the corners of the 16:9 box — the box's own
+            corners are inside the blank letterbox strip, where rounding is
+            invisible against the page.
+
             The gradient is centered on the OPPOSITE corner of each 30x30 box
-            (e.g. the top-left mask's circle is centered at its own bottom
-            right) — that's where a real border-radius arc's center would
-            sit, so the sharp true corner ends up in the opaque region and
-            the curve ends up transparent, not the other way round. Hidden
-            via CSS unless Settings > Style > "Rounded media corners" is on. */}
+            (the top-left mask's circle is centered at its own bottom right):
+            that's where a real border-radius arc's center sits, so the sharp
+            corner falls in the opaque region and the curve stays clear.
+            Hidden via CSS unless Settings > Style > "Rounded media corners"
+            is on. */}
         {(["top left", "top right", "bottom left", "bottom right"] as const).map((corner) => {
           const [v, h] = corner.split(" ") as ["top" | "bottom", "left" | "right"];
           const opposite = { top: "bottom", bottom: "top", left: "right", right: "left" } as const;
@@ -122,7 +135,7 @@ export default function VimeoPlayer({ html }: { html: string }) {
               className="media-grid-video-corner-mask"
               style={{
                 position: "absolute",
-                [v]: 0,
+                [v]: LETTERBOX,
                 [h]: 0,
                 width: 30,
                 height: 30,
