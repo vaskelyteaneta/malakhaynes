@@ -106,10 +106,16 @@ export default function VimeoPlayer({ html }: { html: string }) {
             video still visibly paints past it. These paint a solid quarter-
             circle over each corner instead, which works no matter what the
             video layer does, since it doesn't depend on clipping it at all.
-            Hidden via CSS unless Settings > Style > "Rounded media corners"
-            is on. */}
+            The gradient is centered on the OPPOSITE corner of each 30x30 box
+            (e.g. the top-left mask's circle is centered at its own bottom
+            right) — that's where a real border-radius arc's center would
+            sit, so the sharp true corner ends up in the opaque region and
+            the curve ends up transparent, not the other way round. Hidden
+            via CSS unless Settings > Style > "Rounded media corners" is on. */}
         {(["top left", "top right", "bottom left", "bottom right"] as const).map((corner) => {
           const [v, h] = corner.split(" ") as ["top" | "bottom", "left" | "right"];
+          const opposite = { top: "bottom", bottom: "top", left: "right", right: "left" } as const;
+          const gradientPos = `${opposite[v]} ${opposite[h]}`;
           return (
             <div
               key={corner}
@@ -120,7 +126,7 @@ export default function VimeoPlayer({ html }: { html: string }) {
                 [h]: 0,
                 width: 30,
                 height: 30,
-                background: `radial-gradient(circle at ${corner}, transparent 30px, var(--background) 30px)`,
+                background: `radial-gradient(circle at ${gradientPos}, transparent 30px, var(--background) 30px)`,
                 zIndex: 3,
                 pointerEvents: "none",
               }}
