@@ -122,22 +122,31 @@ html, body {
 
 /* Mobile: collapse the media grid to a single stacked column instead of
    side-by-side, and let items that spanned multiple columns fall back to
-   spanning just the one column that remains. */
+   spanning just the one column that remains.
+
+   The column must be minmax(0, 1fr), never a bare 1fr: 1fr means
+   minmax(auto, 1fr), and that auto floor is the item's min-content width —
+   a portrait poster's intrinsic width (e.g. 3509px) — so the column refuses
+   to shrink to the phone and the image overflows the screen. */
 @media (max-width: 768px) {
   .media-grid-row {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: minmax(0, 1fr) !important;
   }
   .media-grid-row > * {
     grid-column: auto !important;
+    min-width: 0;
   }
   .media-grid-fullrow {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: minmax(0, 1fr) !important;
   }
 
+  /* 1.5rem of side padding, not 1rem: a caption under a full-bleed row spans
+     the whole screen, so anything less leaves the text almost touching the
+     phone's edges. */
   .media-grid-caption {
     font-size: 1rem !important;
     line-height: 1.4 !important;
-    padding: 0.5rem 1rem !important;
+    padding: 0.5rem 1.5rem !important;
   }
 
   /* Body text matches the nav's 1rem on mobile — captions and text blocks
