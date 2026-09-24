@@ -120,6 +120,27 @@ html, body {
   display: block;
 }
 
+/* ...except when the media runs edge to edge, where a rounded corner would
+   curve away from the screen edge against nothing. Two things go full-bleed:
+   a slice with Gaps set to "full-screen" (marked data-full-bleed) and a row
+   of items whose Size is "full-screen" (.media-grid-fullrow, a 100vw row).
+   Both stay square. */
+[data-full-bleed="true"] .media-grid-image-wrap,
+[data-full-bleed="true"] .media-grid-video-wrap,
+[data-full-bleed="true"] .media-grid-video-wrap iframe,
+[data-full-bleed="true"] .media-grid-video-wrap video,
+.media-grid-fullrow .media-grid-image-wrap,
+.media-grid-fullrow .media-grid-video-wrap,
+.media-grid-fullrow .media-grid-video-wrap iframe,
+.media-grid-fullrow .media-grid-video-wrap video {
+  border-radius: 0;
+  clip-path: none;
+}
+[data-full-bleed="true"] .media-grid-video-corner-mask,
+.media-grid-fullrow .media-grid-video-corner-mask {
+  display: none;
+}
+
 /* Mobile: collapse the media grid to a single stacked column instead of
    side-by-side, and let items that spanned multiple columns fall back to
    spanning just the one column that remains.

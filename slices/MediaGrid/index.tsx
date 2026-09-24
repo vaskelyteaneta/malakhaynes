@@ -63,6 +63,9 @@ const MediaGrid = ({ slice }: MediaGridProps): React.JSX.Element => {
     <section
       data-slice-type={slice.slice_type}
       data-slice-variation={slice.variation}
+      // Edge-to-edge media skips the rounded corners (see globals.css) —
+      // rounding only reads as intentional when there's a gutter beside it.
+      data-full-bleed={fullScreen ? "true" : undefined}
       style={fullScreen ? { maxWidth: "100%", margin: 0, padding: 0 } : { maxWidth: CONTAINER_MAX_WIDTH, margin: "0 auto", padding: CONTAINER_PADDING }}
     >
       {mode === "Slider" ? (
