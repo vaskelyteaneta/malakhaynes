@@ -332,6 +332,10 @@ export type MediaGridSliceDefault = prismic.SharedSliceVariation<
     display_mode: prismic.SelectField<"Grid" | "Slider">;
     items_per_row: prismic.SelectField<"1" | "2" | "3" | "4">;
     gaps: prismic.SelectField<"normal" | "full-screen">;
+    item_gap: prismic.SelectField<"none" | "small" | "normal" | "large">;
+    slice_spacing: prismic.SelectField<"none" | "small" | "normal" | "large">;
+    text_size: prismic.SelectField<"small" | "normal" | "large">;
+    text_align: prismic.SelectField<"left" | "center" | "right">;
     items: prismic.GroupField<Simplify<MediaGridSliceDefaultPrimaryItemsItem>>;
   }>,
   never

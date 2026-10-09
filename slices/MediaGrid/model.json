@@ -15,7 +15,7 @@
         "shared_caption": {
           "type": "StructuredText",
           "config": {
-            "label": "Shared caption (optional — used when every item shares the same caption, instead of filling in each item's own Caption field)",
+            "label": "Shared caption (optional \u2014 used when every item shares the same caption, instead of filling in each item's own Caption field)",
             "placeholder": "",
             "allowTargetBlank": false,
             "multi": "paragraph,strong,em"
@@ -35,7 +35,10 @@
           "config": {
             "label": "Display mode",
             "placeholder": "",
-            "options": ["Grid", "Slider"],
+            "options": [
+              "Grid",
+              "Slider"
+            ],
             "default_value": "Grid"
           }
         },
@@ -44,7 +47,12 @@
           "config": {
             "label": "Items per row (Grid) / slides per view (Slider)",
             "placeholder": "",
-            "options": ["1", "2", "3", "4"],
+            "options": [
+              "1",
+              "2",
+              "3",
+              "4"
+            ],
             "default_value": "1"
           }
         },
@@ -53,8 +61,65 @@
           "config": {
             "label": "Gaps (spacing between items & grid width)",
             "placeholder": "",
-            "options": ["normal", "full-screen"],
+            "options": [
+              "normal",
+              "full-screen"
+            ],
             "default_value": "normal"
+          }
+        },
+        "item_gap": {
+          "type": "Select",
+          "config": {
+            "label": "Space between items in a row",
+            "placeholder": "",
+            "options": [
+              "none",
+              "small",
+              "normal",
+              "large"
+            ],
+            "default_value": "normal"
+          }
+        },
+        "slice_spacing": {
+          "type": "Select",
+          "config": {
+            "label": "Space above and below this section",
+            "placeholder": "",
+            "options": [
+              "none",
+              "small",
+              "normal",
+              "large"
+            ],
+            "default_value": "normal"
+          }
+        },
+        "text_size": {
+          "type": "Select",
+          "config": {
+            "label": "Text size (captions and text blocks)",
+            "placeholder": "",
+            "options": [
+              "small",
+              "normal",
+              "large"
+            ],
+            "default_value": "normal"
+          }
+        },
+        "text_align": {
+          "type": "Select",
+          "config": {
+            "label": "Text alignment (captions and text blocks)",
+            "placeholder": "",
+            "options": [
+              "left",
+              "center",
+              "right"
+            ],
+            "default_value": "center"
           }
         },
         "items": {
@@ -67,29 +132,52 @@
                 "config": {
                   "label": "Content type",
                   "placeholder": "",
-                  "options": ["Video", "Image", "Embed", "Text"],
+                  "options": [
+                    "Video",
+                    "Image",
+                    "Embed",
+                    "Text"
+                  ],
                   "default_value": "Image"
                 }
               },
               "video": {
                 "type": "Link",
-                "config": { "label": "Video file (.mp4 upload)", "placeholder": "Upload or select an mp4", "select": "media" }
+                "config": {
+                  "label": "Video file (.mp4 upload)",
+                  "placeholder": "Upload or select an mp4",
+                  "select": "media"
+                }
               },
               "video_url": {
                 "type": "Text",
-                "config": { "label": "Video URL (.m3u8 HLS stream or .mp4) — paste an external link; overrides the uploaded file above", "placeholder": "https://…/playlist.m3u8" }
+                "config": {
+                  "label": "Video URL (.m3u8 HLS stream or .mp4) \u2014 paste an external link; overrides the uploaded file above",
+                  "placeholder": "https://\u2026/playlist.m3u8"
+                }
               },
               "poster": {
                 "type": "Image",
-                "config": { "label": "Poster / still image (Video) — when set, the grid shows this still and clicking it follows the item's Link instead of playing inline", "constraint": {}, "thumbnails": [] }
+                "config": {
+                  "label": "Poster / still image (Video) \u2014 when set, the grid shows this still and clicking it follows the item's Link instead of playing inline",
+                  "constraint": {},
+                  "thumbnails": []
+                }
               },
               "image": {
                 "type": "Image",
-                "config": { "label": "Image", "constraint": {}, "thumbnails": [] }
+                "config": {
+                  "label": "Image",
+                  "constraint": {},
+                  "thumbnails": []
+                }
               },
               "embed": {
                 "type": "Embed",
-                "config": { "label": "Embed (YouTube / Vimeo / SoundCloud)", "placeholder": "Paste a URL" }
+                "config": {
+                  "label": "Embed (YouTube / Vimeo / SoundCloud)",
+                  "placeholder": "Paste a URL"
+                }
               },
               "text": {
                 "type": "StructuredText",
@@ -111,14 +199,24 @@
               },
               "link": {
                 "type": "Link",
-                "config": { "label": "Link (optional — makes the item clickable)", "placeholder": "", "allowTargetBlank": true, "select": null }
+                "config": {
+                  "label": "Link (optional \u2014 makes the item clickable)",
+                  "placeholder": "",
+                  "allowTargetBlank": true,
+                  "select": null
+                }
               },
               "size": {
                 "type": "Select",
                 "config": {
                   "label": "Size (Grid mode only)",
                   "placeholder": "",
-                  "options": ["small", "medium", "large", "full-screen"],
+                  "options": [
+                    "small",
+                    "medium",
+                    "large",
+                    "full-screen"
+                  ],
                   "default_value": "medium"
                 }
               },
@@ -127,7 +225,11 @@
                 "config": {
                   "label": "Image fit",
                   "placeholder": "",
-                  "options": ["contain", "cover", "fill"],
+                  "options": [
+                    "contain",
+                    "cover",
+                    "fill"
+                  ],
                   "default_value": "contain"
                 }
               },
@@ -136,7 +238,15 @@
                 "config": {
                   "label": "Image height",
                   "placeholder": "",
-                  "options": ["auto", "300px", "400px", "500px", "600px", "700px", "800px"],
+                  "options": [
+                    "auto",
+                    "300px",
+                    "400px",
+                    "500px",
+                    "600px",
+                    "700px",
+                    "800px"
+                  ],
                   "default_value": "auto"
                 }
               }

@@ -174,9 +174,13 @@ html, body {
 
   /* 1.5rem of side padding, not 1rem: a caption under a full-bleed row spans
      the whole screen, so anything less leaves the text almost touching the
-     phone's edges. */
+     phone's edges.
+
+     Font size multiplies by --media-text-scale rather than being a flat value,
+     so a slice set to a larger or smaller text size still differs on a phone.
+     Unset scale is 1, which keeps the previous flat 1rem exactly. */
   .media-grid-caption {
-    font-size: 1rem !important;
+    font-size: calc(1rem * var(--media-text-scale, 1)) !important;
     line-height: 1.4 !important;
     padding: 0.5rem 1.5rem !important;
   }

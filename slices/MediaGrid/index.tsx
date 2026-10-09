@@ -31,6 +31,37 @@ const REM_PX = 16;
 const MAX_WIDTH_PX = parseFloat(CONTAINER_MAX_WIDTH);
 const CONTAINER_PADDING_PX = parseFloat(CONTAINER_PADDING) * REM_PX;
 
+// Spacing and type controls, all defaulting to what the site rendered before
+// they existed. Published documents don't carry a value for a newly added
+// field, so an unset choice has to resolve to the old hardcoded value or every
+// existing page would shift the moment these shipped.
+const ITEM_GAP_REM: Record<string, number> = { none: 0, small: 0.75, normal: 1.5, large: 3 };
+const SLICE_SPACING: Record<string, string> = { none: "0rem", small: "1rem", normal: "2rem", large: "4rem" };
+const TEXT_SCALE: Record<string, number> = { small: 0.85, normal: 1, large: 1.25 };
+const DEFAULT_ITEM_GAP_REM = 1.5;
+const DEFAULT_TEXT_SCALE = 1;
+const DEFAULT_TEXT_ALIGN = "center";
+
+type TextAlign = "left" | "center" | "right";
+
+// One place for caption/text styling, so an alignment or size choice can't end
+// up applying to five of the six places captions are rendered.
+//
+// The values are read from CSS variables set on the slice's <section> rather
+// than passed in: captions are rendered four components deep (section →
+// GridLayout → MediaItem → renderByType), and threading two props through all
+// of that is noise for something every caption wants anyway.
+function captionStyle(opts?: { base?: string; bold?: boolean }): React.CSSProperties {
+  return {
+    textAlign: "var(--media-text-align, center)" as React.CSSProperties["textAlign"],
+    fontSize: `calc(${opts?.base ?? CAPTION_FONT_SIZE} * var(--media-text-scale, 1))`,
+    lineHeight: "1.8",
+    padding: "0.75rem 1rem",
+    color: "var(--foreground)",
+    ...(opts?.bold ? { fontWeight: "bold" as const } : {}),
+  };
+}
+
 const CAPTION_FONT_SIZE = "clamp(0.85rem, 0.55rem + 0.9vw, 1.1rem)";
 const TEXT_FONT_SIZE = "clamp(0.8rem, 0.6rem + 0.5vw, 0.95rem)";
 
@@ -57,7 +88,16 @@ const MediaGrid = ({ slice }: MediaGridProps): React.JSX.Element => {
   const sliderPerView = isMobile ? 1 : configuredPerView;
   const items = slice.primary.items;
   const fullScreen = slice.primary.gaps === "full-screen";
-  const gap = fullScreen ? 0 : 1.5;
+  const gap = fullScreen ? 0 : (ITEM_GAP_REM[slice.primary.item_gap ?? ""] ?? DEFAULT_ITEM_GAP_REM);
+  const textAlign = (slice.primary.text_align as TextAlign) || DEFAULT_TEXT_ALIGN;
+  const textScale = TEXT_SCALE[slice.primary.text_size ?? ""] ?? DEFAULT_TEXT_SCALE;
+
+  // Only the vertical padding follows the spacing choice: the horizontal half
+  // also sets the slider's track width (CONTAINER_PADDING_PX), so varying it
+  // would knock sliders out of alignment with every other slice. An unset
+  // choice keeps the old values exactly — 2rem contained, 0 full-bleed.
+  const chosenSpacing = SLICE_SPACING[slice.primary.slice_spacing ?? ""];
+  const verticalPadding = chosenSpacing ?? (fullScreen ? "0rem" : CONTAINER_PADDING);
 
   return (
     <section
@@ -66,7 +106,16 @@ const MediaGrid = ({ slice }: MediaGridProps): React.JSX.Element => {
       // Edge-to-edge media skips the rounded corners (see globals.css) —
       // rounding only reads as intentional when there's a gutter beside it.
       data-full-bleed={fullScreen ? "true" : undefined}
-      style={fullScreen ? { maxWidth: "100%", margin: 0, padding: 0 } : { maxWidth: CONTAINER_MAX_WIDTH, margin: "0 auto", padding: CONTAINER_PADDING }}
+      style={{
+        // Read by captionStyle() and by the mobile caption rule in globals.css,
+        // so the chosen size scales on phones instead of being overridden by a
+        // flat value.
+        "--media-text-scale": textScale,
+        "--media-text-align": textAlign,
+        ...(fullScreen
+          ? { maxWidth: "100%", margin: 0, padding: `${verticalPadding} 0` }
+          : { maxWidth: CONTAINER_MAX_WIDTH, margin: "0 auto", padding: `${verticalPadding} ${CONTAINER_PADDING}` }),
+      } as unknown as React.CSSProperties}
     >
       {mode === "Slider" ? (
         <SliderLayout items={items} perView={sliderPerView} gap={gap} fullScreen={fullScreen} sharedCaption={slice.primary.shared_caption} />
@@ -75,7 +124,7 @@ const MediaGrid = ({ slice }: MediaGridProps): React.JSX.Element => {
       )}
 
       {Array.isArray(slice.primary.section_title) && isFilled.richText(slice.primary.section_title) && (
-        <div className="media-grid-caption" style={{ textAlign: "center", fontSize: CAPTION_FONT_SIZE, lineHeight: "1.8", padding: "0.75rem 1rem", color: "var(--foreground)", fontWeight: "bold" }}>
+        <div className="media-grid-caption" style={captionStyle({ bold: true })}>
           <PrismicRichText field={slice.primary.section_title} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
         </div>
       )}
@@ -150,7 +199,7 @@ function GridLayout({ items, columns, gap, sharedCaption }: { items: Item[]; col
           Items with their own caption still show that caption individually
           (see MediaItem); this shared one is always present when filled. */}
       {hasSharedCaption && (
-        <div className="media-grid-caption" style={{ textAlign: "center", fontSize: CAPTION_FONT_SIZE, lineHeight: "1.8", padding: "0.75rem 1rem", color: "var(--foreground)" }}>
+        <div className="media-grid-caption" style={captionStyle()}>
           <PrismicRichText field={sharedCaption} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
         </div>
       )}
@@ -280,12 +329,12 @@ function SliderLayout({ items, perView, gap, fullScreen, sharedCaption }: { item
         return (
           <>
             {ownCaptionItems.map((item, i) => (
-              <div key={i} className="media-grid-caption" style={{ textAlign: "center", fontSize: CAPTION_FONT_SIZE, lineHeight: "1.8", padding: "0.75rem 1rem", color: "var(--foreground)" }}>
+              <div key={i} className="media-grid-caption" style={captionStyle()}>
                 <PrismicRichText field={item.caption} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
               </div>
             ))}
             {anyFallsBackToShared && Array.isArray(sharedCaption) && isFilled.richText(sharedCaption) && (
-              <div className="media-grid-caption" style={{ textAlign: "center", fontSize: CAPTION_FONT_SIZE, lineHeight: "1.8", padding: "0.75rem 1rem", color: "var(--foreground)" }}>
+              <div className="media-grid-caption" style={captionStyle()}>
                 <PrismicRichText field={sharedCaption} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
               </div>
             )}
@@ -302,7 +351,7 @@ function MediaItem({ item, style, referenceWidthPx }: { item: Item; style?: Reac
     <figure style={{ margin: 0, ...style }}>
       <ItemMedia item={item} referenceWidthPx={referenceWidthPx} />
       {Array.isArray(caption) && isFilled.richText(caption) && (
-        <div className="media-grid-caption" style={{ textAlign: "center", fontSize: CAPTION_FONT_SIZE, lineHeight: "1.8", padding: "0.75rem 1rem", color: "var(--foreground)" }}>
+        <div className="media-grid-caption" style={captionStyle()}>
           <PrismicRichText field={caption} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
         </div>
       )}
@@ -370,15 +419,7 @@ function renderByType(item: Item, referenceWidthPx: number): React.JSX.Element |
 
     case "Text":
       return isFilled.richText(item.text) ? (
-        <div
-          className="media-grid-caption"
-          style={{
-            textAlign: "center",
-            fontSize: TEXT_FONT_SIZE,
-            lineHeight: "1.8",
-            padding: "0.75rem 1rem",
-          }}
-        >
+        <div className="media-grid-caption" style={captionStyle({ base: TEXT_FONT_SIZE })}>
           <PrismicRichText field={item.text} />
         </div>
       ) : null;
