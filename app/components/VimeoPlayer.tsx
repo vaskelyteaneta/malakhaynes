@@ -10,6 +10,13 @@ import Player from "@vimeo/player";
 // video there are no bars to hide, so nothing has to be covered up.
 const DEFAULT_RATIO = 9 / 16;
 
+// A tall format at full column width gets enormous — a 1:1 video is as tall as
+// it is wide, so it fills the whole screen and pushes everything else out of
+// view. Cap the height and let the box narrow to suit, centred in its column.
+// Widescreen is unaffected: 16:9 only reaches this height on a very wide
+// viewport, so those still run the full width as before.
+const MAX_HEIGHT_VH = 78;
+
 export default function VimeoPlayer({
   html,
   width,
@@ -104,7 +111,19 @@ export default function VimeoPlayer({
           this is the element with the actual clipped box (overflow:hidden +
           the padding-bottom aspect-ratio trick); the outer div has no size or
           background of its own, so rounding it is visually a no-op. */}
-      <div className="media-grid-video-wrap" style={{ position: "relative", paddingBottom: `${ratio * 100}%`, height: 0, overflow: "hidden" }}>
+      <div
+        className="media-grid-video-wrap"
+        style={{
+          position: "relative",
+          // Real aspect-ratio rather than the padding-bottom trick, so the box
+          // has a genuine height that max-width can be derived from.
+          aspectRatio: `1 / ${ratio}`,
+          width: "100%",
+          maxWidth: `calc(${MAX_HEIGHT_VH}vh / ${ratio})`,
+          margin: "0 auto",
+          overflow: "hidden",
+        }}
+      >
         {/* src is intentionally set in the effect (not here) so it loads exactly
             once per mount and reliably (re)loads across client-side navigations. */}
         <iframe
