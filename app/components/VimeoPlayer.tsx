@@ -3,15 +3,22 @@
 import { useEffect, useRef, useState } from "react";
 import Player from "@vimeo/player";
 
-// The film is wider than the 16:9 box, so Vimeo letterboxes it: this much of
-// the box's height at the top and at the bottom is empty, covered by
-// background-coloured strips. The visible film therefore starts this far down
-// and ends this far up — which is where the rounded corners have to go, not at
-// the box's own corners (those sit in the blank strip, where rounding is
-// invisible against the page).
-const LETTERBOX = "8%";
+// Shape the player to the video's own aspect ratio, taken from the dimensions
+// Prismic stores with the embed. Forcing every video into 16:9 is what put
+// black bars around anything that isn't — pillarboxing a square 1:1 video down
+// the sides, letterboxing a 2:1 film top and bottom. With the box matching the
+// video there are no bars to hide, so nothing has to be covered up.
+const DEFAULT_RATIO = 9 / 16;
 
-export default function VimeoPlayer({ html }: { html: string }) {
+export default function VimeoPlayer({
+  html,
+  width,
+  height,
+}: {
+  html: string;
+  width?: number | null;
+  height?: number | null;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<Player | null>(null);
@@ -20,6 +27,8 @@ export default function VimeoPlayer({ html }: { html: string }) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [hovered, setHovered] = useState(false);
+
+  const ratio = width && height && width > 0 ? height / width : DEFAULT_RATIO;
 
   const videoId = html.match(/vimeo\.com\/video\/(\d+)/)?.[1];
   const src = videoId
@@ -95,7 +104,7 @@ export default function VimeoPlayer({ html }: { html: string }) {
           this is the element with the actual clipped box (overflow:hidden +
           the padding-bottom aspect-ratio trick); the outer div has no size or
           background of its own, so rounding it is visually a no-op. */}
-      <div className="media-grid-video-wrap" style={{ position: "relative", paddingBottom: "56.25%", height: 0, overflow: "hidden" }}>
+      <div className="media-grid-video-wrap" style={{ position: "relative", paddingBottom: `${ratio * 100}%`, height: 0, overflow: "hidden" }}>
         {/* src is intentionally set in the effect (not here) so it loads exactly
             once per mount and reliably (re)loads across client-side navigations. */}
         <iframe
@@ -103,21 +112,13 @@ export default function VimeoPlayer({ html }: { html: string }) {
           allow="autoplay; fullscreen; picture-in-picture"
           style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0 }}
         />
-        {/* Overlays to cover letterbox bars, matching the site's current background */}
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: LETTERBOX, background: "var(--background)", zIndex: 2 }} />
-        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: LETTERBOX, background: "var(--background)", zIndex: 2 }} />
 
         {/* Corner masks: Vimeo's video is its own GPU-composited layer, which
             some browsers let paint straight through a clip-path/border-radius
             clip on the wrapper (or even on the iframe itself), so the film
             keeps its square corners however the box is clipped. These paint a
-            background-coloured quarter-circle over each corner of the film
-            instead, which works whatever the video layer does.
-
-            Offset vertically by LETTERBOX so they sit on the corners of the
-            visible film, not the corners of the 16:9 box — the box's own
-            corners are inside the blank letterbox strip, where rounding is
-            invisible against the page.
+            background-coloured quarter-circle over each corner instead, which
+            works whatever the video layer does.
 
             The gradient is centered on the OPPOSITE corner of each 30x30 box
             (the top-left mask's circle is centered at its own bottom right):
@@ -135,7 +136,7 @@ export default function VimeoPlayer({ html }: { html: string }) {
               className="media-grid-video-corner-mask"
               style={{
                 position: "absolute",
-                [v]: LETTERBOX,
+                [v]: 0,
                 [h]: 0,
                 width: 30,
                 height: 30,
@@ -165,7 +166,7 @@ export default function VimeoPlayer({ html }: { html: string }) {
           radius so the seek bar never reaches into the rounded corners —
           otherwise its straight edge cuts across the curve and looks like an
           unrounded frame laid over the video. */}
-      <div style={{ position: "absolute", bottom: "9%", left: 0, right: 0, zIndex: 5, opacity: hovered ? 1 : 0, transition: "opacity 0.2s", padding: "0 34px 8px" }}>
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 5, opacity: hovered ? 1 : 0, transition: "opacity 0.2s", padding: "0 34px 12px" }}>
         <div style={{ color: "#fff", fontSize: "0.75rem", fontFamily: "monospace", textShadow: "0 1px 4px rgba(0,0,0,0.8)", marginBottom: 6 }}>
           {fmt(currentTime)} / {fmt(duration)}
         </div>

@@ -353,10 +353,17 @@ function renderByType(item: Item, referenceWidthPx: number): React.JSX.Element |
 
     case "Embed": {
       if (!isFilled.embed(item.embed) || !item.embed.html) return null;
+      // oEmbed reports the video's real dimensions; shape the box to them so
+      // anything that isn't 16:9 (a square 1:1 clip, a 2:1 film) doesn't get
+      // black bars down the sides or across the top.
+      // oEmbed extras are loosely typed, so check before trusting them.
+      const embedWidth = typeof item.embed.width === "number" ? item.embed.width : null;
+      const embedHeight = typeof item.embed.height === "number" ? item.embed.height : null;
       if (item.embed.html.includes("vimeo.com/video/")) {
-        return <VimeoPlayer html={item.embed.html} />;
+        return <VimeoPlayer html={item.embed.html} width={embedWidth} height={embedHeight} />;
       }
-      return <div className="media-grid-video-wrap" style={{ position: "relative", paddingBottom: "56.25%", height: 0, overflow: "hidden" }}>
+      const ratio = embedWidth && embedHeight && embedWidth > 0 ? embedHeight / embedWidth : 0.5625;
+      return <div className="media-grid-video-wrap" style={{ position: "relative", paddingBottom: `${ratio * 100}%`, height: 0, overflow: "hidden" }}>
         <div style={{ position: "absolute", inset: 0 }} dangerouslySetInnerHTML={{ __html: item.embed.html.replace("<iframe", '<iframe style="width:100%;height:100%;position:absolute;top:0;left:0"') }} />
       </div>;
     }
