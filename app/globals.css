@@ -141,6 +141,17 @@ html, body {
   display: none;
 }
 
+/* Full-bleed also overrides the player's height cap. That cap works by
+   limiting the box's width, which would otherwise stop an edge-to-edge video
+   from actually reaching the edges — asking for full-screen and getting a
+   centred box instead. Here the explicit full-screen choice wins over the
+   cap, whatever the video's shape. !important because the cap is an inline
+   style on the element, which a plain stylesheet rule can't override. */
+[data-full-bleed="true"] .media-grid-video-wrap,
+.media-grid-fullrow .media-grid-video-wrap {
+  max-width: none !important;
+}
+
 /* Mobile: collapse the media grid to a single stacked column instead of
    side-by-side, and let items that spanned multiple columns fall back to
    spanning just the one column that remains.
