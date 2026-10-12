@@ -38,14 +38,6 @@ const CONTAINER_PADDING_PX = parseFloat(CONTAINER_PADDING) * REM_PX;
 const ITEM_GAP_REM: Record<string, number> = { none: 0, small: 0.75, normal: 1.5, large: 3 };
 const SLICE_SPACING: Record<string, string> = { none: "0rem", small: "1rem", normal: "2rem", large: "4rem" };
 const TEXT_SCALE: Record<string, number> = { small: 0.85, normal: 1, large: 1.25 };
-// Hover label sizes. "medium" is the size the label shipped at, so it's also
-// what an unset choice falls back to.
-const HOVER_LABEL_SIZE: Record<string, string> = {
-  small: "clamp(0.8rem, 0.6rem + 0.7vw, 1.1rem)",
-  medium: "clamp(1rem, 0.7rem + 1.1vw, 1.6rem)",
-  large: "clamp(1.3rem, 0.9rem + 1.7vw, 2.4rem)",
-};
-
 const DEFAULT_ITEM_GAP_REM = 1.5;
 const DEFAULT_TEXT_SCALE = 1;
 const DEFAULT_TEXT_ALIGN = "center";
@@ -71,6 +63,15 @@ function captionStyle(opts?: { base?: string; bold?: boolean }): React.CSSProper
 }
 
 const CAPTION_FONT_SIZE = "clamp(0.85rem, 0.55rem + 0.9vw, 1.1rem)";
+
+// Hover label sizes reuse the caption scale, so "small/medium/large" mean the
+// same thing wherever they appear in the editor. Defined after
+// CAPTION_FONT_SIZE because it reads it at module load.
+const HOVER_LABEL_SIZE: Record<string, string> = {
+  small: `calc(${CAPTION_FONT_SIZE} * ${TEXT_SCALE.small})`,
+  medium: `calc(${CAPTION_FONT_SIZE} * ${TEXT_SCALE.normal})`,
+  large: `calc(${CAPTION_FONT_SIZE} * ${TEXT_SCALE.large})`,
+};
 const TEXT_FONT_SIZE = "clamp(0.8rem, 0.6rem + 0.5vw, 0.95rem)";
 
 // Below this width, the slider shows one item per screen (more, shorter

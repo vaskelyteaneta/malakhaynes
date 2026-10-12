@@ -109,7 +109,7 @@ html, body {
   text-align: center;
   /* Size comes from the slice's "Hover label size" setting; the fallback is
      the medium step, so an unset choice renders exactly as before. */
-  font-size: var(--hover-label-size, clamp(1rem, 0.7rem + 1.1vw, 1.6rem));
+  font-size: var(--hover-label-size, clamp(0.85rem, 0.55rem + 0.9vw, 1.1rem));
   line-height: 1.3;
   color: var(--background);
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.35);
