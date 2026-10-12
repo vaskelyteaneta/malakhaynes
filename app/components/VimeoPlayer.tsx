@@ -103,7 +103,14 @@ export default function VimeoPlayer({
   return (
     <div
       ref={containerRef}
-      style={{ position: "relative" }}
+      className="media-grid-video-box"
+      // Same width cap as the inner .media-grid-video-wrap below. The play
+      // overlay and the controls bar are positioned against THIS element, so
+      // if it stayed full grid-cell width while the film sat capped and
+      // centred inside it, the timecode and seek bar would render out on the
+      // blank space beside the film — which is exactly what happened with
+      // tall videos, whose cap is narrowest.
+      style={{ position: "relative", width: "100%", maxWidth: `calc(${MAX_HEIGHT_VH}vh / ${ratio})`, margin: "0 auto" }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >

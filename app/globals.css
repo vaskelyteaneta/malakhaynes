@@ -177,7 +177,9 @@ html, body {
    cap, whatever the video's shape. !important because the cap is an inline
    style on the element, which a plain stylesheet rule can't override. */
 [data-full-bleed="true"] .media-grid-video-wrap,
-.media-grid-fullrow .media-grid-video-wrap {
+[data-full-bleed="true"] .media-grid-video-box,
+.media-grid-fullrow .media-grid-video-wrap,
+.media-grid-fullrow .media-grid-video-box {
   max-width: none !important;
 }
 
