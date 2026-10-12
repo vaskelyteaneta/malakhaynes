@@ -120,13 +120,6 @@ html, body {
 .media-grid__link:hover .media-grid__hover-label {
   opacity: 1;
 }
-/* Touch devices have no hover, so the label would never appear — and worse,
-   a tap can leave it stuck on. Hide it where hover isn't real. */
-@media (hover: none) {
-  .media-grid__hover-label {
-    display: none;
-  }
-}
 
 /* Rounded media corners: Settings > Style > "Rounded media corners" toggle.
    Covers every media type — images/video posters (.media-grid-image-wrap)
