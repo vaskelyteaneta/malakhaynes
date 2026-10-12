@@ -337,6 +337,7 @@ export type MediaGridSliceDefault = prismic.SharedSliceVariation<
     slice_spacing: prismic.SelectField<"none" | "small" | "normal" | "large">;
     text_size: prismic.SelectField<"small" | "normal" | "large">;
     text_align: prismic.SelectField<"left" | "center" | "right">;
+    hover_label_size: prismic.SelectField<"small" | "medium" | "large">;
     items: prismic.GroupField<Simplify<MediaGridSliceDefaultPrimaryItemsItem>>;
   }>,
   never

@@ -122,6 +122,19 @@
             "default_value": "center"
           }
         },
+        "hover_label_size": {
+          "type": "Select",
+          "config": {
+            "label": "Hover label size",
+            "placeholder": "",
+            "options": [
+              "small",
+              "medium",
+              "large"
+            ],
+            "default_value": "medium"
+          }
+        },
         "items": {
           "type": "Group",
           "config": {
