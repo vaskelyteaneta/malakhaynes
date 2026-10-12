@@ -206,6 +206,13 @@
                   "select": null
                 }
               },
+              "hover_label": {
+                "type": "Text",
+                "config": {
+                  "label": "Hover label (optional \u2014 shown over the image on hover; defaults to the linked page's name)",
+                  "placeholder": "e.g. Aquarelle"
+                }
+              },
               "size": {
                 "type": "Select",
                 "config": {

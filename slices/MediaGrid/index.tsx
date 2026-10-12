@@ -366,6 +366,7 @@ function ItemMedia({ item, referenceWidthPx }: { item: Item; referenceWidthPx: n
   // Internal (document) links stay in the same tab so navigation stays inside
   // the site; only external web links open in a new tab.
   const external = item.link.link_type === "Web";
+  const label = hoverLabel(item);
   return (
     <PrismicNextLink
       field={item.link}
@@ -373,8 +374,22 @@ function ItemMedia({ item, referenceWidthPx }: { item: Item; referenceWidthPx: n
       {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
     >
       {media}
+      {label && <span className="media-grid__hover-label">{label}</span>}
     </PrismicNextLink>
   );
+}
+
+// Label shown over a linked item while it greys out on hover. Falls back to
+// the linked page's uid so the common case needs no data entry at all — a tile
+// linking to /aquarelle reads "Aquarelle" on its own. The explicit field is
+// there for when the uid isn't what you'd want on screen (it may be
+// abbreviated, or carry a typo, as "tranference-unveiled" currently does).
+function hoverLabel(item: Item): string | null {
+  const explicit = isFilled.keyText(item.hover_label) ? item.hover_label.trim() : "";
+  if (explicit) return explicit;
+  const uid = item.link.link_type === "Document" ? item.link.uid : null;
+  if (!uid) return null;
+  return uid.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 function renderByType(item: Item, referenceWidthPx: number): React.JSX.Element | null {

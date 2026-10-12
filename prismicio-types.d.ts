@@ -312,6 +312,7 @@ export interface MediaGridSliceDefaultPrimaryItemsItem {
   text: prismic.RichTextField;
   caption: prismic.RichTextField;
   link: prismic.LinkField;
+  hover_label: prismic.KeyTextField;
   size: prismic.SelectField<"small" | "medium" | "large" | "full-screen">;
   object_fit: prismic.SelectField<"contain" | "cover" | "fill">;
   image_height: prismic.SelectField<"auto" | "300px" | "400px" | "500px" | "600px" | "700px" | "800px">;
