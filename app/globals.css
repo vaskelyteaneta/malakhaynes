@@ -107,9 +107,9 @@ html, body {
   justify-content: center;
   padding: 1rem;
   text-align: center;
-  /* Size comes from the slice's "Hover label size" setting; the fallback is
-     the medium step, so an unset choice renders exactly as before. */
-  font-size: var(--hover-label-size, clamp(0.85rem, 0.55rem + 0.9vw, 1.1rem));
+  /* Default size; an item that sets "Hover label size" overrides this inline.
+     Matches the caption size, so the steps mean the same thing site-wide. */
+  font-size: clamp(0.85rem, 0.55rem + 0.9vw, 1.1rem);
   line-height: 1.3;
   color: var(--background);
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.35);

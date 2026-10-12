@@ -122,19 +122,6 @@
             "default_value": "center"
           }
         },
-        "hover_label_size": {
-          "type": "Select",
-          "config": {
-            "label": "Hover label size",
-            "placeholder": "",
-            "options": [
-              "small",
-              "medium",
-              "large"
-            ],
-            "default_value": "medium"
-          }
-        },
         "items": {
           "type": "Group",
           "config": {
@@ -224,6 +211,19 @@
                 "config": {
                   "label": "Hover label (optional \u2014 shown over the image on hover; defaults to the linked page's name)",
                   "placeholder": "e.g. Aquarelle"
+                }
+              },
+              "hover_label_size": {
+                "type": "Select",
+                "config": {
+                  "label": "Hover label size",
+                  "placeholder": "",
+                  "options": [
+                    "small",
+                    "medium",
+                    "large"
+                  ],
+                  "default_value": "medium"
                 }
               },
               "size": {

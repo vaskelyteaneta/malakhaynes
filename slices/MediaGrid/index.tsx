@@ -65,8 +65,9 @@ function captionStyle(opts?: { base?: string; bold?: boolean }): React.CSSProper
 const CAPTION_FONT_SIZE = "clamp(0.85rem, 0.55rem + 0.9vw, 1.1rem)";
 
 // Hover label sizes reuse the caption scale, so "small/medium/large" mean the
-// same thing wherever they appear in the editor. Defined after
-// CAPTION_FONT_SIZE because it reads it at module load.
+// same thing wherever they appear in the editor. Set per item, alongside the
+// label itself, so the two read as a pair. Defined after CAPTION_FONT_SIZE
+// because it reads it at module load.
 const HOVER_LABEL_SIZE: Record<string, string> = {
   small: `calc(${CAPTION_FONT_SIZE} * ${TEXT_SCALE.small})`,
   medium: `calc(${CAPTION_FONT_SIZE} * ${TEXT_SCALE.normal})`,
@@ -100,7 +101,6 @@ const MediaGrid = ({ slice }: MediaGridProps): React.JSX.Element => {
   const gap = fullScreen ? 0 : (ITEM_GAP_REM[slice.primary.item_gap ?? ""] ?? DEFAULT_ITEM_GAP_REM);
   const textAlign = (slice.primary.text_align as TextAlign) || DEFAULT_TEXT_ALIGN;
   const textScale = TEXT_SCALE[slice.primary.text_size ?? ""] ?? DEFAULT_TEXT_SCALE;
-  const hoverLabelSize = HOVER_LABEL_SIZE[slice.primary.hover_label_size ?? ""];
 
   // Only the vertical padding follows the spacing choice: the horizontal half
   // also sets the slider's track width (CONTAINER_PADDING_PX), so varying it
@@ -122,7 +122,6 @@ const MediaGrid = ({ slice }: MediaGridProps): React.JSX.Element => {
         // flat value.
         "--media-text-scale": textScale,
         "--media-text-align": textAlign,
-        ...(hoverLabelSize ? { "--hover-label-size": hoverLabelSize } : {}),
         ...(fullScreen
           ? { maxWidth: "100%", margin: 0, padding: `${verticalPadding} 0` }
           : { maxWidth: CONTAINER_MAX_WIDTH, margin: "0 auto", padding: `${verticalPadding} ${CONTAINER_PADDING}` }),
@@ -385,7 +384,14 @@ function ItemMedia({ item, referenceWidthPx }: { item: Item; referenceWidthPx: n
       {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
     >
       {media}
-      {label && <span className="media-grid__hover-label">{label}</span>}
+      {label && (
+        <span
+          className="media-grid__hover-label"
+          style={HOVER_LABEL_SIZE[item.hover_label_size ?? ""] ? { fontSize: HOVER_LABEL_SIZE[item.hover_label_size ?? ""] } : undefined}
+        >
+          {label}
+        </span>
+      )}
     </PrismicNextLink>
   );
 }
