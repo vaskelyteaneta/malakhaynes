@@ -2,6 +2,7 @@ import { createClient } from "@/prismicio";
 import { isFilled } from "@prismicio/client";
 import { PrismicNextLink } from "@prismicio/next";
 import { PrismicRichText } from "@prismicio/react";
+import { plainRichText } from "@/app/components/richText";
 
 export default async function Footer() {
   const client = createClient();
@@ -22,7 +23,7 @@ export default async function Footer() {
     >
       {isFilled.richText(settings.data.footer_text) && (
         <div className="footer-text" style={{ fontSize: "0.9rem", lineHeight: "1.6" }}>
-          <PrismicRichText field={settings.data.footer_text} />
+          <PrismicRichText field={settings.data.footer_text} components={plainRichText} />
         </div>
       )}
       {footerLinks.length > 0 && (

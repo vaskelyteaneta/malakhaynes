@@ -5,6 +5,7 @@ import { Content, isFilled, type RichTextField, type ImageField } from "@prismic
 import { SliceComponentProps, PrismicRichText } from "@prismicio/react";
 import { PrismicNextImage, PrismicNextLink } from "@prismicio/next";
 import VimeoPlayer from "@/app/components/VimeoPlayer";
+import { captionRichText, plainRichText } from "@/app/components/richText";
 // Type-only import: erased at build time, so hls.js is never pulled into the
 // server bundle or loaded during SSR. The runtime library is imported lazily
 // inside CustomVideoPlayer, on the client, only when an HLS source is played.
@@ -135,7 +136,7 @@ const MediaGrid = ({ slice }: MediaGridProps): React.JSX.Element => {
 
       {Array.isArray(slice.primary.section_title) && isFilled.richText(slice.primary.section_title) && (
         <div className="media-grid-caption" style={captionStyle({ bold: true })}>
-          <PrismicRichText field={slice.primary.section_title} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
+          <PrismicRichText field={slice.primary.section_title} components={captionRichText} />
         </div>
       )}
     </section>
@@ -210,7 +211,7 @@ function GridLayout({ items, columns, gap, sharedCaption }: { items: Item[]; col
           (see MediaItem); this shared one is always present when filled. */}
       {hasSharedCaption && (
         <div className="media-grid-caption" style={captionStyle()}>
-          <PrismicRichText field={sharedCaption} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
+          <PrismicRichText field={sharedCaption} components={captionRichText} />
         </div>
       )}
     </div>
@@ -340,12 +341,12 @@ function SliderLayout({ items, perView, gap, fullScreen, sharedCaption }: { item
           <>
             {ownCaptionItems.map((item, i) => (
               <div key={i} className="media-grid-caption" style={captionStyle()}>
-                <PrismicRichText field={item.caption} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
+                <PrismicRichText field={item.caption} components={captionRichText} />
               </div>
             ))}
             {anyFallsBackToShared && Array.isArray(sharedCaption) && isFilled.richText(sharedCaption) && (
               <div className="media-grid-caption" style={captionStyle()}>
-                <PrismicRichText field={sharedCaption} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
+                <PrismicRichText field={sharedCaption} components={captionRichText} />
               </div>
             )}
           </>
@@ -362,7 +363,7 @@ function MediaItem({ item, style, referenceWidthPx }: { item: Item; style?: Reac
       <ItemMedia item={item} referenceWidthPx={referenceWidthPx} />
       {Array.isArray(caption) && isFilled.richText(caption) && (
         <div className="media-grid-caption" style={captionStyle()}>
-          <PrismicRichText field={caption} components={{ paragraph: ({ children }) => <p style={{ margin: "0.1em 0" }}>{children}</p> }} />
+          <PrismicRichText field={caption} components={captionRichText} />
         </div>
       )}
     </figure>
@@ -452,7 +453,7 @@ function renderByType(item: Item, referenceWidthPx: number): React.JSX.Element |
     case "Text":
       return isFilled.richText(item.text) ? (
         <div className="media-grid-caption" style={captionStyle({ base: TEXT_FONT_SIZE })}>
-          <PrismicRichText field={item.text} />
+          <PrismicRichText field={item.text} components={plainRichText} />
         </div>
       ) : null;
 
