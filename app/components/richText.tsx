@@ -18,6 +18,15 @@ function paragraphSerializer(style?: React.CSSProperties): RichTextComponents {
         {node.text.trim() === "" ? <br /> : children}
       </p>
     ),
+    // Text pasted from Word, a PDF or a design tool often arrives with every
+    // space turned into a non-breaking space. A non-breaking space forbids a
+    // line break, so such a line becomes one unbreakable word and runs off the
+    // side of its column instead of wrapping — the credits on /aquarelle had
+    // 70 of them and not a single ordinary space. Render them as ordinary
+    // spaces so the text wraps; a deliberate non-breaking space is not worth
+    // the pages that silently overflow.
+    span: ({ text, key }) =>
+      text.includes("\u00a0") ? <React.Fragment key={key}>{text.replace(/\u00a0/g, " ")}</React.Fragment> : text,
   };
 }
 
