@@ -20,6 +20,19 @@
   --color-foreground: var(--foreground);
 }
 
+/* Width of every non-full-bleed media slice. Phones get the full width (two
+   thirds of a 375px screen is 250px, far too narrow); tablet and up get two
+   thirds of the viewport, uncapped, matching malakhaynes.com. The 2rem here
+   is CONTAINER_PADDING in MediaGrid — keep the two in step. */
+:root {
+  --media-column: 100%;
+}
+@media (min-width: 768px) {
+  :root {
+    --media-column: calc(66.67vw + 2 * 2rem);
+  }
+}
+
 @theme inline {
   --font-sans: var(--font-cormorant-garamond);
 }

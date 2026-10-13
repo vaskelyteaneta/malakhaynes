@@ -27,11 +27,13 @@ const CONTAINER_PADDING = "2rem";
 // which is what malakhaynes.com does: one column width for every item, with
 // each item's height left to follow its own shape.
 //
-// Deliberately uncapped. A max-width here would mean the two-thirds rule only
-// applies on smaller screens and the column reverts to a fixed pixel width on
-// a large monitor — which is the layout this replaced. The old site scales all
-// the way up, so this does too. Full-bleed slices ignore this entirely.
-const CONTAINER_WIDTH = `calc(66.67vw + 2 * ${CONTAINER_PADDING})`;
+// Defined in globals.css so it can vary by breakpoint: two thirds of the
+// viewport on tablet and up (uncapped, scaling all the way to large monitors
+// the way malakhaynes.com does), but the full width on a phone — where two
+// thirds of 375px is only 250px and leaves the page looking like a narrow
+// ribbon. The old site makes the same distinction: 1267 at 1900px wide, but
+// 338 of 375 on a phone. Full-bleed slices ignore this entirely.
+const CONTAINER_WIDTH = "var(--media-column)";
 
 // Pixel equivalents of the layout constants above, used for the responsive
 // image size hints and the slider's track maths.
