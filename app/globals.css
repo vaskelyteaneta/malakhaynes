@@ -111,8 +111,12 @@ html, body {
      Matches the caption size, so the steps mean the same thing site-wide. */
   font-size: clamp(0.85rem, 0.55rem + 0.9vw, 1.1rem);
   line-height: 1.3;
-  color: var(--background);
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.35);
+  /* Always white, never var(--background). The label sits over a photo, not
+     over the page, so it has to read against the image — on the dark site
+     var(--background) is black, which made it near-invisible. The shadow
+     keeps it legible over a pale photo on either site. */
+  color: #fff;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55);
   opacity: 0;
   transition: opacity 0.35s ease;
   pointer-events: none;
