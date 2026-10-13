@@ -25,13 +25,13 @@ const CONTAINER_PADDING = "2rem";
 // The width every non-full-bleed slice actually renders at. The content inside
 // (once CONTAINER_PADDING is subtracted) lands on two thirds of the viewport,
 // which is what malakhaynes.com does: one column width for every item, with
-// each item's height left to follow its own shape. Capped at
-// CONTAINER_MAX_WIDTH so it stops growing on very large monitors.
+// each item's height left to follow its own shape.
 //
-// CONTAINER_MAX_WIDTH stays a bare pixel string because MAX_WIDTH_PX below
-// parses it for the responsive-image size hints; parseFloat cannot read a
-// min()/calc() expression.
-const CONTAINER_WIDTH = `min(${CONTAINER_MAX_WIDTH}, calc(66.67vw + 2 * ${CONTAINER_PADDING}))`;
+// Deliberately uncapped. A max-width here would mean the two-thirds rule only
+// applies on smaller screens and the column reverts to a fixed pixel width on
+// a large monitor — which is the layout this replaced. The old site scales all
+// the way up, so this does too. Full-bleed slices ignore this entirely.
+const CONTAINER_WIDTH = `calc(66.67vw + 2 * ${CONTAINER_PADDING})`;
 
 // Used to convert the CMS's image_height (a design-time pixel value, chosen
 // while looking at the item at roughly its default rendered width) into an
