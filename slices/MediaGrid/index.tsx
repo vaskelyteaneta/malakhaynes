@@ -22,6 +22,17 @@ const SPAN: Record<string, number> = { small: 1, medium: 1, large: 2, "full-scre
 const CONTAINER_MAX_WIDTH = "1200px";
 const CONTAINER_PADDING = "2rem";
 
+// The width every non-full-bleed slice actually renders at. The content inside
+// (once CONTAINER_PADDING is subtracted) lands on two thirds of the viewport,
+// which is what malakhaynes.com does: one column width for every item, with
+// each item's height left to follow its own shape. Capped at
+// CONTAINER_MAX_WIDTH so it stops growing on very large monitors.
+//
+// CONTAINER_MAX_WIDTH stays a bare pixel string because MAX_WIDTH_PX below
+// parses it for the responsive-image size hints; parseFloat cannot read a
+// min()/calc() expression.
+const CONTAINER_WIDTH = `min(${CONTAINER_MAX_WIDTH}, calc(66.67vw + 2 * ${CONTAINER_PADDING}))`;
+
 // Used to convert the CMS's image_height (a design-time pixel value, chosen
 // while looking at the item at roughly its default rendered width) into an
 // aspect-ratio instead of a literal height. A literal height stays fixed as
@@ -125,7 +136,7 @@ const MediaGrid = ({ slice }: MediaGridProps): React.JSX.Element => {
         "--media-text-align": textAlign,
         ...(fullScreen
           ? { maxWidth: "100%", margin: 0, padding: `${verticalPadding} 0` }
-          : { maxWidth: CONTAINER_MAX_WIDTH, margin: "0 auto", padding: `${verticalPadding} ${CONTAINER_PADDING}` }),
+          : { maxWidth: CONTAINER_WIDTH, margin: "0 auto", padding: `${verticalPadding} ${CONTAINER_PADDING}` }),
       } as unknown as React.CSSProperties}
     >
       {mode === "Slider" ? (
@@ -322,7 +333,7 @@ function SliderLayout({ items, perView, gap, fullScreen, sharedCaption }: { item
             {arrows}
           </div>
         ) : (
-          <div style={{ maxWidth: CONTAINER_MAX_WIDTH, margin: "0 auto", padding: `0 ${CONTAINER_PADDING}`, position: "relative", height: activeHeight, overflow: "hidden" }}>
+          <div style={{ maxWidth: CONTAINER_WIDTH, margin: "0 auto", padding: `0 ${CONTAINER_PADDING}`, position: "relative", height: activeHeight, overflow: "hidden" }}>
             {track}
             {arrows}
           </div>

@@ -15,7 +15,11 @@ const DEFAULT_RATIO = 9 / 16;
 // view. Cap the height and let the box narrow to suit, centred in its column.
 // Widescreen is unaffected: 16:9 only reaches this height on a very wide
 // viewport, so those still run the full width as before.
-const MAX_HEIGHT_VH = 78;
+// No height cap. A cap on height means the resulting WIDTH depends on each
+// video's aspect ratio and on the window height, so a row of videos lands on a
+// different width each — which is what made them look misaligned. Width is set
+// by the column (see CONTAINER_WIDTH in MediaGrid) and height simply follows
+// the video's own shape, the way malakhaynes.com has always done it.
 
 export default function VimeoPlayer({
   html,
@@ -110,7 +114,7 @@ export default function VimeoPlayer({
       // centred inside it, the timecode and seek bar would render out on the
       // blank space beside the film — which is exactly what happened with
       // tall videos, whose cap is narrowest.
-      style={{ position: "relative", width: "100%", maxWidth: `calc(${MAX_HEIGHT_VH}vh / ${ratio})`, margin: "0 auto" }}
+      style={{ position: "relative", width: "100%", margin: "0 auto" }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -126,8 +130,6 @@ export default function VimeoPlayer({
           // has a genuine height that max-width can be derived from.
           aspectRatio: `1 / ${ratio}`,
           width: "100%",
-          maxWidth: `calc(${MAX_HEIGHT_VH}vh / ${ratio})`,
-          margin: "0 auto",
           overflow: "hidden",
         }}
       >
