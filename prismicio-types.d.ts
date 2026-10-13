@@ -316,7 +316,6 @@ export interface MediaGridSliceDefaultPrimaryItemsItem {
   hover_label_size: prismic.SelectField<"small" | "medium" | "large">;
   size: prismic.SelectField<"small" | "medium" | "large" | "full-screen">;
   object_fit: prismic.SelectField<"contain" | "cover" | "fill">;
-  image_height: prismic.SelectField<"auto" | "300px" | "400px" | "500px" | "600px" | "700px" | "800px">;
 }
 
 /**

@@ -15,7 +15,7 @@
         "shared_caption": {
           "type": "StructuredText",
           "config": {
-            "label": "Shared caption (optional \u2014 used when every item shares the same caption, instead of filling in each item's own Caption field)",
+            "label": "Shared caption (optional — used when every item shares the same caption, instead of filling in each item's own Caption field)",
             "placeholder": "",
             "allowTargetBlank": false,
             "multi": "paragraph,strong,em"
@@ -152,14 +152,14 @@
               "video_url": {
                 "type": "Text",
                 "config": {
-                  "label": "Video URL (.m3u8 HLS stream or .mp4) \u2014 paste an external link; overrides the uploaded file above",
-                  "placeholder": "https://\u2026/playlist.m3u8"
+                  "label": "Video URL (.m3u8 HLS stream or .mp4) — paste an external link; overrides the uploaded file above",
+                  "placeholder": "https://…/playlist.m3u8"
                 }
               },
               "poster": {
                 "type": "Image",
                 "config": {
-                  "label": "Poster / still image (Video) \u2014 when set, the grid shows this still and clicking it follows the item's Link instead of playing inline",
+                  "label": "Poster / still image (Video) — when set, the grid shows this still and clicking it follows the item's Link instead of playing inline",
                   "constraint": {},
                   "thumbnails": []
                 }
@@ -200,7 +200,7 @@
               "link": {
                 "type": "Link",
                 "config": {
-                  "label": "Link (optional \u2014 makes the item clickable)",
+                  "label": "Link (optional — makes the item clickable)",
                   "placeholder": "",
                   "allowTargetBlank": true,
                   "select": null
@@ -209,7 +209,7 @@
               "hover_label": {
                 "type": "Text",
                 "config": {
-                  "label": "Hover label (optional \u2014 shown over the image on hover; defaults to the linked page's name)",
+                  "label": "Hover label (optional — shown over the image on hover; defaults to the linked page's name)",
                   "placeholder": "e.g. Aquarelle"
                 }
               },
@@ -251,23 +251,6 @@
                     "fill"
                   ],
                   "default_value": "contain"
-                }
-              },
-              "image_height": {
-                "type": "Select",
-                "config": {
-                  "label": "Image height",
-                  "placeholder": "",
-                  "options": [
-                    "auto",
-                    "300px",
-                    "400px",
-                    "500px",
-                    "600px",
-                    "700px",
-                    "800px"
-                  ],
-                  "default_value": "auto"
                 }
               }
             }

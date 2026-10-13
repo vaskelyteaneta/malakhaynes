@@ -33,12 +33,8 @@ const CONTAINER_PADDING = "2rem";
 // the way up, so this does too. Full-bleed slices ignore this entirely.
 const CONTAINER_WIDTH = `calc(66.67vw + 2 * ${CONTAINER_PADDING})`;
 
-// Used to convert the CMS's image_height (a design-time pixel value, chosen
-// while looking at the item at roughly its default rendered width) into an
-// aspect-ratio instead of a literal height. A literal height stays fixed as
-// the viewport narrows, so the box gets relatively taller — eventually
-// square, then portrait. An aspect-ratio scales with the box's actual
-// rendered width instead, keeping the same shape at any size.
+// Pixel equivalents of the layout constants above, used for the responsive
+// image size hints and the slider's track maths.
 const REM_PX = 16;
 const MAX_WIDTH_PX = parseFloat(CONTAINER_MAX_WIDTH);
 const CONTAINER_PADDING_PX = parseFloat(CONTAINER_PADDING) * REM_PX;
@@ -473,7 +469,7 @@ function renderByType(item: Item, referenceWidthPx: number): React.JSX.Element |
   }
 }
 
-// Renders an image sized by the item's image_height / object_fit controls.
+// Renders an image sized by the item's object_fit control.
 // Shared by the Image content type and the Video poster still so both honour
 // the same sizing. A literal pixel height is treated as a design-time value at
 // roughly referenceWidthPx wide and converted to an aspect-ratio, so the box
@@ -483,26 +479,20 @@ function renderByType(item: Item, referenceWidthPx: number): React.JSX.Element |
 function renderSizedImage(image: ImageField, item: Item, referenceWidthPx: number): React.JSX.Element | null {
   if (!isFilled.image(image)) return null;
   const fit = (item.object_fit || "contain") as React.CSSProperties["objectFit"];
-  const h = item.image_height || "auto";
-  const heightPx = h === "auto" ? null : parseFloat(h);
   // Always reserve the image's space up-front so the layout never collapses to a
   // blank gap while the image is still loading — on a slow connection an
   // unreserved (aspectRatio:undefined) box has zero height and the page looks
-  // like it "didn't load". For a fixed height we derive the ratio from the
-  // reference width; for "auto" we use the image's own intrinsic dimensions.
+  // like it "didn't load". The box takes its shape from the image itself, so
+  // the image always fills the column's full width.
   const dims = image.dimensions;
-  const aspectRatio = heightPx
-    ? `${referenceWidthPx} / ${heightPx}`
-    : dims?.width && dims?.height
-      ? `${dims.width} / ${dims.height}`
-      : undefined;
+  const aspectRatio = dims?.width && dims?.height ? `${dims.width} / ${dims.height}` : undefined;
   return (
     <div className="media-grid-image-wrap" style={{ width: "100%", aspectRatio, overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center" }}>
       <PrismicNextImage
         field={image}
         fallbackAlt=""
         className="media-grid-image"
-        style={{ width: "100%", height: heightPx ? "100%" : "auto", objectFit: heightPx ? fit : undefined, display: "block" }}
+        style={{ width: "100%", height: "auto", objectFit: fit, display: "block" }}
       />
     </div>
   );
