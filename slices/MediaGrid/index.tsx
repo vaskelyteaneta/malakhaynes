@@ -341,14 +341,20 @@ function SliderLayout({ items, perView, gap, fullScreen, sharedCaption }: { item
             : { position: "relative", width: "100vw", left: "50%", transform: "translateX(-50%)" }
         }
       >
+        {/* overflow:hidden belongs on the track alone, not on the box that also
+            holds the arrows: an arrow is a circle with a drop shadow, and
+            clipping its container sliced the shadow off against the track's
+            edge, leaving a hard-edged dark rectangle beside the button. The
+            arrows are siblings of the clipped track, positioned against the
+            same relative box, so their shadows fall outside it freely. */}
         {fullScreen ? (
-          <div style={{ position: "relative", height: activeHeight, overflow: "hidden" }}>
-            {track}
+          <div style={{ position: "relative", height: activeHeight }}>
+            <div style={{ height: "100%", overflow: "hidden" }}>{track}</div>
             {arrows}
           </div>
         ) : (
-          <div style={{ maxWidth: CONTAINER_WIDTH, margin: "0 auto", padding: `0 ${CONTAINER_PADDING}`, position: "relative", height: activeHeight, overflow: "hidden" }}>
-            {track}
+          <div style={{ maxWidth: CONTAINER_WIDTH, margin: "0 auto", padding: `0 ${CONTAINER_PADDING}`, position: "relative", height: activeHeight }}>
+            <div style={{ height: "100%", overflow: "hidden" }}>{track}</div>
             {arrows}
           </div>
         )}
