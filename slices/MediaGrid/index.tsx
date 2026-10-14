@@ -269,17 +269,33 @@ function SliderLayout({ items, perView, gap, fullScreen, sharedCaption }: { item
     setIndex(newIndex);
   };
 
+  // A bare glyph with no background sat straight on the photo and was easy to
+  // miss, so people did not realise a row could be slid. Give it a circular
+  // backdrop in the page colour: it reads on any image, adapts to the light
+  // and dark sites on its own, and is a 44px target, which is the minimum
+  // comfortable tap size on a phone.
   const arrowStyle: React.CSSProperties = {
     position: "absolute",
     top: "50%",
     transform: "translateY(-50%)",
-    background: "none",
-    border: "none",
-    fontSize: "2rem",
+    width: "44px",
+    height: "44px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "color-mix(in srgb, var(--background) 78%, transparent)",
+    backdropFilter: "blur(6px)",
+    WebkitBackdropFilter: "blur(6px)",
+    border: "1px solid color-mix(in srgb, var(--foreground) 20%, transparent)",
+    borderRadius: "50%",
+    boxShadow: "0 2px 12px rgba(0, 0, 0, 0.18)",
+    fontSize: "1.75rem",
     cursor: "pointer",
     color: "var(--foreground)",
     lineHeight: 1,
-    padding: "0.5rem",
+    // The ‹ › glyphs sit slightly low in their line box; nudge them back up
+    // so they look centred in the circle rather than measured to be.
+    paddingBottom: "0.22em",
     zIndex: 10,
   };
 
@@ -305,10 +321,10 @@ function SliderLayout({ items, perView, gap, fullScreen, sharedCaption }: { item
   const arrows = (
     <>
       {canPrev && (
-        <button aria-label="Previous" style={{ ...arrowStyle, left: 0 }} onClick={() => go("prev")}>‹</button>
+        <button aria-label="Previous" className="media-grid__arrow" style={{ ...arrowStyle, left: "8px" }} onClick={() => go("prev")}>‹</button>
       )}
       {canNext && (
-        <button aria-label="Next" style={{ ...arrowStyle, right: 0 }} onClick={() => go("next")}>›</button>
+        <button aria-label="Next" className="media-grid__arrow" style={{ ...arrowStyle, right: "8px" }} onClick={() => go("next")}>›</button>
       )}
     </>
   );
