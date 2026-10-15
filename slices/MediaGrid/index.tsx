@@ -80,14 +80,19 @@ function captionStyle(opts?: { base?: string; bold?: boolean }): React.CSSProper
 
 const CAPTION_FONT_SIZE = "clamp(0.85rem, 0.55rem + 0.9vw, 1.1rem)";
 
-// Hover label sizes reuse the caption scale, so "small/medium/large" mean the
-// same thing wherever they appear in the editor. Set per item, alongside the
-// label itself, so the two read as a pair. Defined after CAPTION_FONT_SIZE
-// because it reads it at module load.
+// The hover label is a film title lying across an image, not body copy, so it
+// gets its own scale rather than the caption one. On the caption scale the
+// three steps spanned 15px to 22px, which nobody could tell apart, and the
+// control felt broken.
+//
+// "small" is a flat 1rem so it matches the nav and the footer exactly — the
+// site's body-text size. The two larger steps clamp with the viewport so a
+// 40px title on a desktop comes down to a readable ~26px on a phone instead
+// of swamping it.
 const HOVER_LABEL_SIZE: Record<string, string> = {
-  small: `calc(${CAPTION_FONT_SIZE} * ${TEXT_SCALE.small})`,
-  medium: `calc(${CAPTION_FONT_SIZE} * ${TEXT_SCALE.normal})`,
-  large: `calc(${CAPTION_FONT_SIZE} * ${TEXT_SCALE.large})`,
+  small: "1rem",
+  medium: "clamp(1.25rem, 0.9rem + 1.4vw, 1.625rem)",
+  large: "clamp(1.6rem, 1rem + 2.6vw, 2.5rem)",
 };
 const TEXT_FONT_SIZE = "clamp(0.8rem, 0.6rem + 0.5vw, 0.95rem)";
 
