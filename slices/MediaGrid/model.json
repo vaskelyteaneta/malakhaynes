@@ -17,8 +17,8 @@
           "config": {
             "label": "Shared caption (optional — used when every item shares the same caption, instead of filling in each item's own Caption field)",
             "placeholder": "",
-            "allowTargetBlank": false,
-            "multi": "paragraph,strong,em"
+            "allowTargetBlank": true,
+            "multi": "paragraph,strong,em,hyperlink"
           }
         },
         "section_title": {
@@ -193,8 +193,8 @@
                 "config": {
                   "label": "Caption (Enter = new row)",
                   "placeholder": "",
-                  "allowTargetBlank": false,
-                  "multi": "paragraph,strong,em"
+                  "allowTargetBlank": true,
+                  "multi": "paragraph,strong,em,hyperlink"
                 }
               },
               "link": {
