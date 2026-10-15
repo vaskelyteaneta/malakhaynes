@@ -3,10 +3,18 @@
 import { useRef, useState } from "react";
 import type { SiteMode } from "@/app/lib/site-mode";
 
-// Malak Haynes and Very Inner Vibrations are two fully separate deployments
-// (own Prismic repo, own Vercel project, own domain). This is no longer a
-// same-site mode toggle — it's a hard link to the other site.
-const VERY_INNER_VIBRATIONS_URL = "https://very-inner-vibrations.vercel.app";
+// This site and Very Inner Vibrations are two fully separate deployments (own Prismic
+// repo, own Vercel project, own domain). This is no longer a same-site mode
+// toggle — it's a hard link to the other site.
+//
+// The address is deployment config, not content: set NEXT_PUBLIC_OTHER_SITE_URL
+// in this project's Vercel environment and the button follows the real domain
+// at launch. It is read at build time (NEXT_PUBLIC_*), so changing it needs a
+// redeploy. The fallback keeps the preview deployments working unchanged while
+// the variable is unset — but it points at a temporary *.vercel.app address,
+// so the variable MUST be set before the real domains go live.
+const VERY_INNER_VIBRATIONS_URL =
+  process.env.NEXT_PUBLIC_OTHER_SITE_URL || "https://very-inner-vibrations.vercel.app";
 
 export default function ThemeToggle({ mode }: { mode: SiteMode }) {
   const otherMode: SiteMode = mode === "dark" ? "light" : "dark";

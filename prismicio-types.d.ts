@@ -187,6 +187,17 @@ type SettingsDocumentDataSlicesSlice = never;
  */
 interface SettingsDocumentData {
   /**
+   * Home page field in *Settings*
+   *
+   * - **Field Type**: Link
+   * - **Placeholder**: Pick a page
+   * - **API ID Path**: settings.homepage
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/fields/link
+   */
+  homepage: prismic.ContentRelationshipField<"page">;
+
+  /**
    * Logo field in *Settings*
    *
    * - **Field Type**: Image
