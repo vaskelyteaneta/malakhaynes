@@ -264,13 +264,5 @@ html, body {
     line-height: 1.4 !important;
     padding: 0.5rem 1.5rem !important;
   }
-
-  /* Body text matches the nav's 1rem on mobile — captions and text blocks
-     above (.media-grid-caption, shared with both), plus the footer. The
-     site title/wordmark is a heading, not body text, and stays as-is. */
-  .footer-text,
-  .footer-link {
-    font-size: 1rem !important;
-  }
 }
 
