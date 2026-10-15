@@ -183,9 +183,35 @@ export default function VimeoPlayer({
         style={{ position: "absolute", inset: 0, zIndex: 4, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
       >
         {!playing && (
-          <div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(255,255,255,0.9)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <span style={{ width: 0, height: 0, borderTop: "11px solid transparent", borderBottom: "11px solid transparent", borderLeft: "18px solid #111", marginLeft: 4 }} />
-          </div>
+          // White on both sites rather than var(--foreground): it sits on the
+          // film, not on the page, so it has to read against the image.
+          // Traced from the play icon on Malak's previous site
+          // (playiconwddAsset-6.png, rendered there at 29x28): a hairline
+          // triangle filling its box, flat left edge, sharp corners, no disc
+          // behind it. Reproduced as an SVG rather than shipping the PNG so it
+          // stays crisp at any size.
+          <svg
+            className="media-grid__play"
+            viewBox="0 0 29 28"
+            aria-hidden="true"
+            focusable="false"
+            style={{
+              // The old site showed it at 29px on a 683px-wide film, about 4%.
+              // Held to that proportion, with a floor and ceiling so it stays
+              // sensible on a small embed and on a full-bleed one.
+              width: "clamp(34px, 4.5%, 64px)",
+              height: "auto",
+              filter: "drop-shadow(0 1px 6px rgba(0, 0, 0, 0.55))",
+            }}
+          >
+            <path
+              d="M2 2 L27 14 L2 26 Z"
+              fill="none"
+              stroke="#fff"
+              vectorEffect="non-scaling-stroke"
+              strokeWidth="1.5"
+            />
+          </svg>
         )}
       </div>
 

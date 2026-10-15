@@ -138,6 +138,18 @@ html, body {
   opacity: 1;
 }
 
+/* Play button: an outlined triangle drawn over the film (Vimeo's own chrome
+   is switched off with controls=0). It lifts slightly when the pointer is
+   anywhere over the video, so it reads as something to press. */
+.media-grid__play {
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  opacity: 0.92;
+}
+.media-grid-video-box:hover .media-grid__play {
+  transform: scale(1.08);
+  opacity: 1;
+}
+
 /* Slider arrows. The base look is inline in MediaGrid; these are the states
    it cannot express inline. The arrow grows and turns solid on hover so it
    reads as something to press, and a visible focus ring keeps it usable from
