@@ -45,9 +45,15 @@ const CONTAINER_PADDING_PX = parseFloat(CONTAINER_PADDING) * REM_PX;
 // they existed. Published documents don't carry a value for a newly added
 // field, so an unset choice has to resolve to the old hardcoded value or every
 // existing page would shift the moment these shipped.
-const ITEM_GAP_REM: Record<string, number> = { none: 0, small: 0.75, normal: 1.5, large: 3 };
-const SLICE_SPACING: Record<string, string> = { none: "0rem", small: "1rem", normal: "2rem", large: "4rem" };
-const TEXT_SCALE: Record<string, number> = { small: 0.85, normal: 1, large: 1.25 };
+//
+// "normal" was renamed to "medium" in the schema. Published documents still
+// hold the literal string "normal", so both keys stay here — drop "normal" and
+// every slice chosen before the rename would silently fall back to the default.
+// "large" is deliberately well clear of medium rather than merely double it:
+// at 4rem it never felt like a real choice.
+const ITEM_GAP_REM: Record<string, number> = { none: 0, small: 0.75, normal: 1.5, medium: 1.5, large: 4 };
+const SLICE_SPACING: Record<string, string> = { none: "0rem", small: "1rem", normal: "2rem", medium: "2rem", large: "6rem" };
+const TEXT_SCALE: Record<string, number> = { small: 0.85, normal: 1, medium: 1, large: 1.25 };
 const DEFAULT_ITEM_GAP_REM = 1.5;
 const DEFAULT_TEXT_SCALE = 1;
 const DEFAULT_TEXT_ALIGN = "center";

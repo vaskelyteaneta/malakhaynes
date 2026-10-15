@@ -71,15 +71,15 @@
         "item_gap": {
           "type": "Select",
           "config": {
-            "label": "Space between items in a row",
+            "label": "Space between items (side by side, and stacked)",
             "placeholder": "",
             "options": [
               "none",
               "small",
-              "normal",
+              "medium",
               "large"
             ],
-            "default_value": "normal"
+            "default_value": "medium"
           }
         },
         "slice_spacing": {
@@ -90,10 +90,10 @@
             "options": [
               "none",
               "small",
-              "normal",
+              "medium",
               "large"
             ],
-            "default_value": "normal"
+            "default_value": "medium"
           }
         },
         "text_size": {
@@ -103,10 +103,10 @@
             "placeholder": "",
             "options": [
               "small",
-              "normal",
+              "medium",
               "large"
             ],
-            "default_value": "normal"
+            "default_value": "medium"
           }
         },
         "text_align": {
