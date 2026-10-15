@@ -22,6 +22,11 @@ function markIntroSeen(): void {
 
 // Auto-dismiss the intro after this long even without any interaction.
 const AUTO_DISMISS_MS = 3000;
+// If the video has not actually started playing within this long, give up on
+// it and dismiss immediately. Otherwise a slow or heavy file leaves the
+// visitor staring at a blank page-coloured screen — black on the dark site —
+// which reads as the site being broken rather than as an intro.
+const VIDEO_START_GRACE_MS = 1200;
 // Fade-out duration; kept in sync with the CSS transition below.
 const FADE_MS = 1500;
 
@@ -101,6 +106,29 @@ export default function IntroOverlay({
       document.body.style.overflow = prevOverflow;
     };
   }, [show, closing]);
+
+  // Skip the intro altogether if the video cannot start promptly. Showing
+  // nothing is better than showing a blank colour for several seconds.
+  useEffect(() => {
+    if (!show || closing || !src) return;
+    const video = videoRef.current;
+    if (!video) return;
+
+    let started = false;
+    const onPlaying = () => {
+      started = true;
+    };
+    video.addEventListener("playing", onPlaying);
+
+    const graceTimer = window.setTimeout(() => {
+      if (!started) setClosing(true);
+    }, VIDEO_START_GRACE_MS);
+
+    return () => {
+      window.clearTimeout(graceTimer);
+      video.removeEventListener("playing", onPlaying);
+    };
+  }, [show, closing, src]);
 
   // Dismiss on interaction, and auto-dismiss after a timeout.
   useEffect(() => {
