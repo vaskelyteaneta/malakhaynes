@@ -170,55 +170,6 @@ html, body {
   outline-offset: 2px;
 }
 
-/* Rounded media corners: Settings > Style > "Rounded media corners" toggle.
-   Covers every media type — images/video posters (.media-grid-image-wrap)
-   and video/embeds (.media-grid-video-wrap). Neither border-radius+
-   overflow:hidden nor a mask-image on the ancestor reliably clips a Vimeo
-   iframe: its video content gets promoted to its own GPU-composited layer,
-   which can bypass an ancestor's clip (and even the iframe's own
-   border-radius) in some browsers. clip-path is a real compositor-level
-   clip rather than a scroll/overflow clip, so it holds up against layer
-   promotion — applied on both the wrapper and the iframe/video itself as
-   belt-and-suspenders. */
-[data-rounded-media="true"] .media-grid-image-wrap,
-[data-rounded-media="true"] .media-grid-video-wrap {
-  border-radius: 30px;
-  overflow: hidden;
-  clip-path: inset(0 round 30px);
-}
-[data-rounded-media="true"] .media-grid-video-wrap iframe,
-[data-rounded-media="true"] .media-grid-video-wrap video {
-  border-radius: 30px;
-  clip-path: inset(0 round 30px);
-}
-.media-grid-video-corner-mask {
-  display: none;
-}
-[data-rounded-media="true"] .media-grid-video-corner-mask {
-  display: block;
-}
-
-/* ...except when the media runs edge to edge, where a rounded corner would
-   curve away from the screen edge against nothing. Two things go full-bleed:
-   a slice with Gaps set to "full-screen" (marked data-full-bleed) and a row
-   of items whose Size is "full-screen" (.media-grid-fullrow, a 100vw row).
-   Both stay square. */
-[data-full-bleed="true"] .media-grid-image-wrap,
-[data-full-bleed="true"] .media-grid-video-wrap,
-[data-full-bleed="true"] .media-grid-video-wrap iframe,
-[data-full-bleed="true"] .media-grid-video-wrap video,
-.media-grid-fullrow .media-grid-image-wrap,
-.media-grid-fullrow .media-grid-video-wrap,
-.media-grid-fullrow .media-grid-video-wrap iframe,
-.media-grid-fullrow .media-grid-video-wrap video {
-  border-radius: 0;
-  clip-path: none;
-}
-[data-full-bleed="true"] .media-grid-video-corner-mask,
-.media-grid-fullrow .media-grid-video-corner-mask {
-  display: none;
-}
-
 /* Full-bleed also overrides the player's height cap. That cap works by
    limiting the box's width, which would otherwise stop an edge-to-edge video
    from actually reaching the edges — asking for full-screen and getting a

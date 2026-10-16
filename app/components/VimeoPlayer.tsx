@@ -141,40 +141,6 @@ export default function VimeoPlayer({
           style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0 }}
         />
 
-        {/* Corner masks: Vimeo's video is its own GPU-composited layer, which
-            some browsers let paint straight through a clip-path/border-radius
-            clip on the wrapper (or even on the iframe itself), so the film
-            keeps its square corners however the box is clipped. These paint a
-            background-coloured quarter-circle over each corner instead, which
-            works whatever the video layer does.
-
-            The gradient is centered on the OPPOSITE corner of each 30x30 box
-            (the top-left mask's circle is centered at its own bottom right):
-            that's where a real border-radius arc's center sits, so the sharp
-            corner falls in the opaque region and the curve stays clear.
-            Hidden via CSS unless Settings > Style > "Rounded media corners"
-            is on. */}
-        {(["top left", "top right", "bottom left", "bottom right"] as const).map((corner) => {
-          const [v, h] = corner.split(" ") as ["top" | "bottom", "left" | "right"];
-          const opposite = { top: "bottom", bottom: "top", left: "right", right: "left" } as const;
-          const gradientPos = `${opposite[v]} ${opposite[h]}`;
-          return (
-            <div
-              key={corner}
-              className="media-grid-video-corner-mask"
-              style={{
-                position: "absolute",
-                [v]: 0,
-                [h]: 0,
-                width: 30,
-                height: 30,
-                background: `radial-gradient(circle at ${gradientPos}, transparent 30px, var(--background) 30px)`,
-                zIndex: 3,
-                pointerEvents: "none",
-              }}
-            />
-          );
-        })}
       </div>
 
       {/* Play/pause overlay */}
@@ -215,11 +181,9 @@ export default function VimeoPlayer({
         )}
       </div>
 
-      {/* Controls bar — inside video, above white overlay, hover only. Side
-          padding (34px) is deliberately wider than the 30px corner-mask
-          radius so the seek bar never reaches into the rounded corners —
-          otherwise its straight edge cuts across the curve and looks like an
-          unrounded frame laid over the video. */}
+      {/* Controls bar — inside the video, above the play overlay, on hover
+          only. The generous side padding keeps the seek bar clear of the
+          film's edges rather than running the full width. */}
       <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 5, opacity: hovered ? 1 : 0, transition: "opacity 0.2s", padding: "0 34px 12px" }}>
         <div style={{ color: "#fff", fontSize: "0.75rem", fontFamily: "monospace", textShadow: "0 1px 4px rgba(0,0,0,0.8)", marginBottom: 6 }}>
           {fmt(currentTime)} / {fmt(duration)}
