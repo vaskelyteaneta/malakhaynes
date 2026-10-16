@@ -40,9 +40,38 @@ export default function VimeoPlayer({
   const [duration, setDuration] = useState(0);
   const [hovered, setHovered] = useState(false);
 
-  const ratio = width && height && width > 0 ? snapAspectRatio(width, height) : DEFAULT_RATIO;
-
   const videoId = html.match(/vimeo\.com\/video\/(\d+)/)?.[1];
+
+  // Prismic stores the embed's size as the oEmbed thumbnail, whole pixels at
+  // about 426 wide, so a 1920x976 film is saved as 426x216 — the true height
+  // of 216.52 rounded down. Shaping the box from that makes it a hair the
+  // wrong shape and Vimeo pads the gap with black.
+  //
+  // Start from the stored value so the box has its space reserved on first
+  // paint, then ask Vimeo for the exact dimensions and correct it. Films that
+  // are a standard shape are snapped up front and the fetch confirms them
+  // without moving anything; only genuinely odd ratios shift, by a fraction
+  // of a percent.
+  const storedRatio = width && height && width > 0 ? snapAspectRatio(width, height) : DEFAULT_RATIO;
+  const [ratio, setRatio] = useState(storedRatio);
+
+  useEffect(() => {
+    if (!videoId) return;
+    let cancelled = false;
+    fetch(`https://vimeo.com/api/oembed.json?url=https://vimeo.com/${videoId}&width=1920`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (cancelled || !data?.width || !data?.height) return;
+        const exact = data.height / data.width;
+        // Any real difference is worth taking: the whole point is that the
+        // stored value is rounded. The guard is only against float noise.
+        if (Math.abs(exact - storedRatio) / storedRatio > 0.0001) setRatio(exact);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [videoId, storedRatio]);
   const src = videoId
     ? `https://player.vimeo.com/video/${videoId}?controls=0&title=0&byline=0&portrait=0&transparent=0&dnt=1`
     : null;
