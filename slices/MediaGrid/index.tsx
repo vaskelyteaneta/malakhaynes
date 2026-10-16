@@ -5,6 +5,7 @@ import { Content, isFilled, type RichTextField, type ImageField } from "@prismic
 import { SliceComponentProps, PrismicRichText } from "@prismicio/react";
 import { PrismicNextImage, PrismicNextLink } from "@prismicio/next";
 import VimeoPlayer from "@/app/components/VimeoPlayer";
+import { snapAspectRatio } from "@/app/lib/aspect-ratio";
 import { captionRichText, plainRichText } from "@/app/components/richText";
 // Type-only import: erased at build time, so hls.js is never pulled into the
 // server bundle or loaded during SSR. The runtime library is imported lazily
@@ -486,7 +487,7 @@ function renderByType(item: Item, referenceWidthPx: number): React.JSX.Element |
       if (item.embed.html.includes("vimeo.com/video/")) {
         return <VimeoPlayer html={item.embed.html} width={embedWidth} height={embedHeight} />;
       }
-      const ratio = embedWidth && embedHeight && embedWidth > 0 ? embedHeight / embedWidth : 0.5625;
+      const ratio = embedWidth && embedHeight && embedWidth > 0 ? snapAspectRatio(embedWidth, embedHeight) : 0.5625;
       return <div className="media-grid-video-wrap" style={{ position: "relative", paddingBottom: `${ratio * 100}%`, height: 0, overflow: "hidden" }}>
         <div style={{ position: "absolute", inset: 0 }} dangerouslySetInnerHTML={{ __html: item.embed.html.replace("<iframe", '<iframe style="width:100%;height:100%;position:absolute;top:0;left:0"') }} />
       </div>;

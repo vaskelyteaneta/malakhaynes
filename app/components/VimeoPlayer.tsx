@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Player from "@vimeo/player";
+import { snapAspectRatio } from "@/app/lib/aspect-ratio";
 
 // Shape the player to the video's own aspect ratio, taken from the dimensions
 // Prismic stores with the embed. Forcing every video into 16:9 is what put
@@ -39,7 +40,7 @@ export default function VimeoPlayer({
   const [duration, setDuration] = useState(0);
   const [hovered, setHovered] = useState(false);
 
-  const ratio = width && height && width > 0 ? height / width : DEFAULT_RATIO;
+  const ratio = width && height && width > 0 ? snapAspectRatio(width, height) : DEFAULT_RATIO;
 
   const videoId = html.match(/vimeo\.com\/video\/(\d+)/)?.[1];
   const src = videoId
