@@ -431,7 +431,12 @@ function ItemMedia({ item, referenceWidthPx }: { item: Item; referenceWidthPx: n
       {label && (
         <span
           className="media-grid__hover-label"
-          style={HOVER_LABEL_SIZE[item.hover_label_size ?? ""] ? { fontSize: HOVER_LABEL_SIZE[item.hover_label_size ?? ""] } : undefined}
+          // Falls back to medium, matching the default the dropdown shows.
+          // Prismic does not save a Select's default until the editor actively
+          // picks it, so an untouched item arrives empty — and treating empty
+          // as "no size" rendered a fourth size nobody could choose, which is
+          // why the two sites disagreed while both read "medium" in the editor.
+          style={{ fontSize: HOVER_LABEL_SIZE[item.hover_label_size || "medium"] }}
         >
           {label}
         </span>
