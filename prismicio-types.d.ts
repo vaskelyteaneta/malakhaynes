@@ -209,6 +209,16 @@ interface SettingsDocumentData {
   logo: prismic.ImageField<never>;
 
   /**
+   * Play button field in *Settings*
+   *
+   * - **Field Type**: Image
+   * - **API ID Path**: settings.play_icon
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/fields/image
+   */
+  play_icon: prismic.ImageField<never>;
+
+  /**
    * Intro video field in *Settings*
    *
    * - **Field Type**: Link to Media

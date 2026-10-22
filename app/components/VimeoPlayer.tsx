@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Player from "@vimeo/player";
 import { snapAspectRatio } from "@/app/lib/aspect-ratio";
 import { claimAudio, releaseAudio } from "@/app/lib/audio-owner";
+import { useSiteSettings } from "@/app/components/SiteSettings";
 
 // Shape the player to the video's own aspect ratio, taken from the dimensions
 // Prismic stores with the embed. Forcing every video into 16:9 is what put
@@ -34,6 +35,7 @@ export default function VimeoPlayer({
   height?: number | null;
   autoplay?: boolean;
 }) {
+  const { playIconUrl } = useSiteSettings();
   const containerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<Player | null>(null);
@@ -239,6 +241,21 @@ export default function VimeoPlayer({
           // triangle filling its box, flat left edge, sharp corners, no disc
           // behind it. Reproduced as an SVG rather than shipping the PNG so it
           // stays crisp at any size.
+          playIconUrl ? (
+            // Settings > Play button. Sized and positioned exactly like the
+            // built-in triangle so swapping the image changes nothing else.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={playIconUrl}
+              alt=""
+              className="media-grid__play"
+              style={{
+                width: "clamp(34px, 4.5%, 64px)",
+                height: "auto",
+                filter: "drop-shadow(0 1px 6px rgba(0, 0, 0, 0.55))",
+              }}
+            />
+          ) : (
           <svg
             className="media-grid__play"
             viewBox="0 0 29 28"
@@ -261,6 +278,7 @@ export default function VimeoPlayer({
               strokeWidth="1.5"
             />
           </svg>
+          )
         )}
       </div>
 

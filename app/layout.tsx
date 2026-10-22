@@ -7,6 +7,7 @@ import Footer from "./components/Footer";
 import Header from "./components/Header";
 import IntroOverlay from "./components/IntroOverlay";
 import StickyHeader from "./components/StickyHeader";
+import { SiteSettingsProvider } from "./components/SiteSettings";
 import ThemeToggle from "./components/ThemeToggle";
 import { getSiteMode } from "./lib/site-mode";
 
@@ -59,7 +60,9 @@ export default async function RootLayout({
               load) remounts every Client Component under here fresh. Without
               this, components like MediaGrid/VimeoPlayer keep their old DOM
               refs and state across the refresh and can render blank. */}
-          <div key={mode} style={{ paddingTop: "128px", flex: "1 0 auto", overflowX: "hidden" }}>{children}</div>
+          <SiteSettingsProvider playIconUrl={isFilled.image(settings.data.play_icon) ? settings.data.play_icon.url : null}>
+            <div key={mode} style={{ paddingTop: "128px", flex: "1 0 auto", overflowX: "hidden" }}>{children}</div>
+          </SiteSettingsProvider>
           <Footer />
           {/* Direct child of <body>, outside anything with overflow set — iOS
               Safari makes position:fixed descendants stick to the nearest
