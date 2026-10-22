@@ -485,7 +485,7 @@ function renderByType(item: Item, referenceWidthPx: number): React.JSX.Element |
       const embedWidth = typeof item.embed.width === "number" ? item.embed.width : null;
       const embedHeight = typeof item.embed.height === "number" ? item.embed.height : null;
       if (item.embed.html.includes("vimeo.com/video/")) {
-        return <VimeoPlayer html={item.embed.html} width={embedWidth} height={embedHeight} />;
+        return <VimeoPlayer html={item.embed.html} width={embedWidth} height={embedHeight} autoplay={item.autoplay === true} />;
       }
       const ratio = embedWidth && embedHeight && embedWidth > 0 ? snapAspectRatio(embedWidth, embedHeight) : 0.5625;
       return <div className="media-grid-video-wrap" style={{ position: "relative", paddingBottom: `${ratio * 100}%`, height: 0, overflow: "hidden" }}>

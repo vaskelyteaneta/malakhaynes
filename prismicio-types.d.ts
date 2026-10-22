@@ -308,6 +308,7 @@ export interface MediaGridSliceDefaultPrimaryItemsItem {
   poster: prismic.ImageField;
   image: prismic.ImageField;
   embed: prismic.EmbedField;
+  autoplay: prismic.BooleanField;
   text: prismic.RichTextField;
   caption: prismic.RichTextField;
   link: prismic.LinkField;

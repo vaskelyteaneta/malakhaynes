@@ -26,10 +26,12 @@ export default function VimeoPlayer({
   html,
   width,
   height,
+  autoplay = false,
 }: {
   html: string;
   width?: number | null;
   height?: number | null;
+  autoplay?: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -39,6 +41,10 @@ export default function VimeoPlayer({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [hovered, setHovered] = useState(false);
+  // Autoplay is only permitted muted — every browser blocks a video that
+  // starts with sound. So an autoplaying video begins silent and the viewer
+  // turns the sound on themselves.
+  const [muted, setMuted] = useState(autoplay);
 
   const videoId = html.match(/vimeo\.com\/video\/(\d+)/)?.[1];
 
@@ -73,7 +79,8 @@ export default function VimeoPlayer({
     };
   }, [videoId, storedRatio]);
   const src = videoId
-    ? `https://player.vimeo.com/video/${videoId}?controls=0&title=0&byline=0&portrait=0&transparent=0&dnt=1`
+    ? `https://player.vimeo.com/video/${videoId}?controls=0&title=0&byline=0&portrait=0&transparent=0&dnt=1` +
+      (autoplay ? "&autoplay=1&muted=1&loop=1" : "")
     : null;
 
   useEffect(() => {
@@ -106,13 +113,26 @@ export default function VimeoPlayer({
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (!entry.isIntersecting) playerRef.current?.pause();
+        if (entry.isIntersecting) {
+          // An autoplaying video is meant to be running whenever it is on
+          // screen, so pick it back up after it was paused on the way past.
+          if (autoplay) playerRef.current?.play().catch(() => {});
+        } else {
+          playerRef.current?.pause();
+        }
       },
       { threshold: 0 }
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [autoplay]);
+
+  const toggleMuted = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const next = !muted;
+    setMuted(next);
+    playerRef.current?.setMuted(next);
+  };
 
   const toggle = () => {
     if (!playerRef.current) return;
@@ -178,7 +198,10 @@ export default function VimeoPlayer({
         onClick={toggle}
         style={{ position: "absolute", inset: 0, zIndex: 4, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
       >
-        {!playing && (
+        {/* No play triangle on an autoplaying video — it is already running,
+            so there is nothing to press. Its place is taken by the mute
+            control below. */}
+        {!playing && !autoplay && (
           // White on both sites rather than var(--foreground): it sits on the
           // film, not on the page, so it has to read against the image.
           // Traced from the play icon on Malak's previous site
@@ -210,6 +233,37 @@ export default function VimeoPlayer({
           </svg>
         )}
       </div>
+
+      {/* Mute control, shown only on autoplaying videos. An autoplaying video
+          has no play button, so without this there would be no way into the
+          sound at all. Words rather than a speaker icon, in the site's own
+          font at the same 1rem as the nav and footer. The label names the
+          action, so it reads "unmute" while silent. */}
+      {autoplay && (
+        <button
+          onClick={toggleMuted}
+          className="media-grid__mute"
+          style={{
+            position: "absolute",
+            bottom: "12px",
+            left: "16px",
+            zIndex: 6,
+            background: "none",
+            border: "none",
+            padding: "0.25rem 0.5rem",
+            cursor: "pointer",
+            font: "inherit",
+            fontSize: "1rem",
+            lineHeight: 1,
+            color: "#fff",
+            // Strong shadow: these sit over paintings that are often nearly
+            // white, where plain white text all but disappears.
+            textShadow: "0 1px 3px rgba(0, 0, 0, 0.9), 0 1px 12px rgba(0, 0, 0, 0.7)",
+          }}
+        >
+          {muted ? "unmute" : "mute"}
+        </button>
+      )}
 
       {/* Controls bar — inside the video, above the play overlay, on hover
           only. The generous side padding keeps the seek bar clear of the
