@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Player from "@vimeo/player";
 import { snapAspectRatio } from "@/app/lib/aspect-ratio";
+import { claimAudio, releaseAudio } from "@/app/lib/audio-owner";
 
 // Shape the player to the video's own aspect ratio, taken from the dimensions
 // Prismic stores with the embed. Forcing every video into 16:9 is what put
@@ -83,6 +84,24 @@ export default function VimeoPlayer({
       (autoplay ? "&autoplay=1&muted=1&loop=1" : "")
     : null;
 
+  // How this player gives up the audio when another one takes it. An
+  // autoplaying video drops back to silent and keeps running; a click-to-play
+  // video pauses, since a silent film playing on is not what anyone wants.
+  // Held in a ref so its identity is stable — the coordinator compares by
+  // reference to know who the current owner is.
+  const yieldAudioRef = useRef<() => void>(() => {});
+  yieldAudioRef.current = () => {
+    if (autoplay) {
+      setMuted(true);
+      playerRef.current?.setMuted(true);
+    } else {
+      playerRef.current?.pause();
+    }
+  };
+  const yieldAudio = useRef(() => yieldAudioRef.current()).current;
+
+  useEffect(() => () => releaseAudio(yieldAudio), [yieldAudio]);
+
   useEffect(() => {
     const iframe = iframeRef.current;
     if (!iframe || !src) return;
@@ -96,15 +115,20 @@ export default function VimeoPlayer({
     const player = new Player(iframe);
     playerRef.current = player;
     player.getDuration().then(d => setDuration(d));
-    player.on("play", () => setPlaying(true));
-    player.on("pause", () => setPlaying(false));
-    player.on("ended", () => { setPlaying(false); setProgress(0); setCurrentTime(0); });
+    player.on("play", () => {
+      setPlaying(true);
+      // An autoplaying video starts muted, so it is not taking the audio by
+      // starting — it only claims it when the viewer presses unmute.
+      if (!autoplay) claimAudio(yieldAudio);
+    });
+    player.on("pause", () => { setPlaying(false); if (!autoplay) releaseAudio(yieldAudio); });
+    player.on("ended", () => { setPlaying(false); setProgress(0); setCurrentTime(0); if (!autoplay) releaseAudio(yieldAudio); });
     player.on("timeupdate", ({ seconds, percent }) => {
       setProgress(percent * 100);
       setCurrentTime(seconds);
     });
     return () => { player.destroy(); };
-  }, [src]);
+  }, [src, autoplay, yieldAudio]);
 
   // Pause automatically once the player scrolls out of view, so audio doesn't
   // keep playing while scrolling away from it.
@@ -132,6 +156,9 @@ export default function VimeoPlayer({
     const next = !muted;
     setMuted(next);
     playerRef.current?.setMuted(next);
+    // Unmuting is this player claiming the page's sound; muting hands it back.
+    if (next) releaseAudio(yieldAudio);
+    else claimAudio(yieldAudio);
   };
 
   const toggle = () => {
