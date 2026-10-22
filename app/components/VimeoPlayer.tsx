@@ -225,10 +225,13 @@ export default function VimeoPlayer({
         onClick={toggle}
         style={{ position: "absolute", inset: 0, zIndex: 4, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
       >
-        {/* No play triangle on an autoplaying video — it is already running,
-            so there is nothing to press. Its place is taken by the mute
-            control below. */}
-        {!playing && !autoplay && (
+        {/* Shown whenever the video is not actually playing — not merely
+            whenever autoplay is off. An autoplaying video hides it because it
+            is already running, but autoplay can be refused (iOS Low Power
+            Mode blocks it even muted), and keying off the setting rather than
+            the real state left those viewers looking at a frozen frame with
+            no visible way to start it. */}
+        {!playing && (
           // White on both sites rather than var(--foreground): it sits on the
           // film, not on the page, so it has to read against the image.
           // Traced from the play icon on Malak's previous site
