@@ -466,7 +466,12 @@ function renderByType(item: Item, referenceWidthPx: number): React.JSX.Element |
     return <VideoPoster item={item} referenceWidthPx={referenceWidthPx} />;
   }
 
-  switch (item.content_type) {
+  // Default to Image, matching what the dropdown shows. Prismic does not save
+  // a Select's default until the editor actively picks it, so an untouched item
+  // arrives with no content_type — and without this it would fall to the
+  // default branch below and render nothing at all, silently dropping an
+  // uploaded image from the page.
+  switch (item.content_type || "Image") {
     case "Video": {
       // No poster → play inline. A pasted external URL (.m3u8 HLS or .mp4)
       // takes precedence over an uploaded .mp4 media file.
