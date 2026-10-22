@@ -245,7 +245,8 @@ export default function VimeoPlayer({
           className="media-grid__mute"
           style={{
             position: "absolute",
-            bottom: "12px",
+            // Top-left, clear of the timecode and seek bar along the bottom.
+            top: "12px",
             left: "16px",
             zIndex: 6,
             background: "none",
