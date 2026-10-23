@@ -153,6 +153,10 @@ export default function IntroOverlay({
     return () => window.clearTimeout(t);
   }, [closing]);
 
+  // Is anything playing or showing behind the logo? Drives whether the logo
+  // needs a shadow to stay legible.
+  const hasMedia = Boolean(src) || isFilled.image(image);
+
   if (!show) return null;
 
   return (
@@ -204,7 +208,7 @@ export default function IntroOverlay({
               fontSize: "clamp(1.5rem, 4vw, 3rem)",
               letterSpacing: "0.15em",
               color: "#fff",
-              textShadow: "0 2px 12px rgba(0,0,0,0.5)",
+              textShadow: hasMedia ? "0 2px 12px rgba(0,0,0,0.5)" : undefined,
             }}
           >
             VERY INNER VIBRATIONS
@@ -213,7 +217,15 @@ export default function IntroOverlay({
           <PrismicNextImage
             field={logo}
             fallbackAlt=""
-            style={{ maxWidth: "min(60vw, 320px)", height: "auto", filter: "drop-shadow(0 2px 12px rgba(0,0,0,0.35))" }}
+            // Shadow only when there is footage or a picture behind the logo,
+            // where it keeps the mark legible over a bright frame. Against the
+            // plain background it has nothing to separate from and just reads
+            // as a smudge under the lettering.
+            style={{
+              maxWidth: "min(60vw, 320px)",
+              height: "auto",
+              filter: hasMedia ? "drop-shadow(0 2px 12px rgba(0,0,0,0.35))" : undefined,
+            }}
           />
         )}
       </div>
