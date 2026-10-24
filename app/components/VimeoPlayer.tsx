@@ -50,6 +50,11 @@ export default function VimeoPlayer({
   // starts with sound. So an autoplaying video begins silent and the viewer
   // turns the sound on themselves.
   const [muted, setMuted] = useState(autoplay);
+  // "play" fires when playback is REQUESTED, not when a frame is on screen.
+  // Hiding the still at that moment just swaps the artwork for Vimeo's black
+  // buffering screen — seconds of it on a phone. Wait until the clock is
+  // actually moving, which only happens once frames are rendering.
+  const [started, setStarted] = useState(false);
 
   const videoId = html.match(/vimeo\.com\/video\/(\d+)/)?.[1];
 
@@ -130,6 +135,7 @@ export default function VimeoPlayer({
     player.on("timeupdate", ({ seconds, percent }) => {
       setProgress(percent * 100);
       setCurrentTime(seconds);
+      if (seconds > 0) setStarted(true);
     });
     return () => { player.destroy(); };
   }, [src, autoplay, yieldAudio]);
@@ -220,7 +226,7 @@ export default function VimeoPlayer({
             without this the visitor scrolls onto a black rectangle where the
             artwork should be. Fades out once the video is running, and stays
             put for click-to-play videos so they never show black either. */}
-        {poster && !playing && (
+        {poster && !started && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={poster}
