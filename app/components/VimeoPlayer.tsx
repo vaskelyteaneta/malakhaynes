@@ -29,11 +29,13 @@ export default function VimeoPlayer({
   width,
   height,
   autoplay = false,
+  poster = null,
 }: {
   html: string;
   width?: number | null;
   height?: number | null;
   autoplay?: boolean;
+  poster?: string | null;
 }) {
   const { playIconUrl } = useSiteSettings();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -212,6 +214,30 @@ export default function VimeoPlayer({
           overflow: "hidden",
         }}
       >
+        {/* The video's own first frame, shown until playback actually starts.
+            A Vimeo player takes a second or two to load — longer on a phone
+            over mobile data, and longer again with several on one page — and
+            without this the visitor scrolls onto a black rectangle where the
+            artwork should be. Fades out once the video is running, and stays
+            put for click-to-play videos so they never show black either. */}
+        {poster && !playing && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={poster}
+            alt=""
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              zIndex: 1,
+              pointerEvents: "none",
+            }}
+          />
+        )}
+
         {/* src is intentionally set in the effect (not here) so it loads exactly
             once per mount and reliably (re)loads across client-side navigations. */}
         <iframe

@@ -495,7 +495,13 @@ function renderByType(item: Item, referenceWidthPx: number): React.JSX.Element |
       const embedWidth = typeof item.embed.width === "number" ? item.embed.width : null;
       const embedHeight = typeof item.embed.height === "number" ? item.embed.height : null;
       if (item.embed.html.includes("vimeo.com/video/")) {
-        return <VimeoPlayer html={item.embed.html} width={embedWidth} height={embedHeight} autoplay={item.autoplay === true} />;
+        // Vimeo ships a still with the embed, but only at 200x150. The size is
+        // encoded in the filename, so asking for a bigger one is a string
+        // swap — without it the placeholder is a blurry smudge.
+        const thumb = typeof item.embed.thumbnail_url === "string"
+          ? item.embed.thumbnail_url.replace(/-d_\d+x\d+/, "-d_1280x720")
+          : null;
+        return <VimeoPlayer html={item.embed.html} width={embedWidth} height={embedHeight} autoplay={item.autoplay === true} poster={thumb} />;
       }
       const ratio = embedWidth && embedHeight && embedWidth > 0 ? snapAspectRatio(embedWidth, embedHeight) : 0.5625;
       return <div className="media-grid-video-wrap" style={{ position: "relative", paddingBottom: `${ratio * 100}%`, height: 0, overflow: "hidden" }}>
