@@ -495,11 +495,17 @@ function renderByType(item: Item, referenceWidthPx: number): React.JSX.Element |
       const embedWidth = typeof item.embed.width === "number" ? item.embed.width : null;
       const embedHeight = typeof item.embed.height === "number" ? item.embed.height : null;
       if (item.embed.html.includes("vimeo.com/video/")) {
-        // Vimeo ships a still with the embed, but only at 200x150. The size is
-        // encoded in the filename, so asking for a bigger one is a string
-        // swap — without it the placeholder is a blurry smudge.
+        // Vimeo ships a still with the embed, but only at 200x150 and always
+        // cropped to 4:3 — the wrong shape for most films. The size is encoded
+        // in the filename and Vimeo honours whatever is asked for, so request
+        // one shaped like this video. Matching the box exactly is what stops
+        // the still being either zoomed (filling a taller box) or letterboxed
+        // with black (fitting inside one).
+        const thumbRatio = embedWidth && embedHeight && embedWidth > 0
+          ? snapAspectRatio(embedWidth, embedHeight)
+          : 0.5625;
         const thumb = typeof item.embed.thumbnail_url === "string"
-          ? item.embed.thumbnail_url.replace(/-d_\d+x\d+/, "-d_1280x720")
+          ? item.embed.thumbnail_url.replace(/-d_\d+x\d+/, `-d_1280x${Math.round(1280 * thumbRatio)}`)
           : null;
         return <VimeoPlayer html={item.embed.html} width={embedWidth} height={embedHeight} autoplay={item.autoplay === true} poster={thumb} />;
       }
