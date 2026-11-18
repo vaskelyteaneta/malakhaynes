@@ -237,7 +237,12 @@ export default function VimeoPlayer({
               inset: 0,
               width: "100%",
               height: "100%",
-              objectFit: "cover",
+              // contain, never cover. Vimeo's thumbnail is a 16:9 crop of the
+              // film, while the box is the film's real shape — so filling the
+              // box scaled the still up and clipped it, and the artwork
+              // visibly jumped when the video took over. Fitting it inside
+              // keeps the framing identical to the video.
+              objectFit: "contain",
               zIndex: 1,
               pointerEvents: "none",
             }}
